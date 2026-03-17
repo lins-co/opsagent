@@ -6,7 +6,8 @@
       "Bash(cd:*)",
       "Bash(grep:*)",
       "Bash(taskkill:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

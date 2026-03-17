@@ -10,7 +10,30 @@ import type { AppData } from "../db/mongo.js";
 
 function parseDate(val: any): Date | null {
   if (!val) return null;
-  const d = new Date(String(val));
+  if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+
+  const s = String(val).trim();
+
+  // Handle "M/D/YYYY, h:mmam/pm" format (e.g., "6/27/2025, 4:43pm")
+  const mdyTime = s.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s*(\d{1,2}):(\d{2})\s*(am|pm)?$/i
+  );
+  if (mdyTime) {
+    const [, month, day, year, rawHour, min, ampm] = mdyTime;
+    let hour = parseInt(rawHour!, 10);
+    if (ampm?.toLowerCase() === "pm" && hour < 12) hour += 12;
+    if (ampm?.toLowerCase() === "am" && hour === 12) hour = 0;
+    return new Date(parseInt(year!, 10), parseInt(month!, 10) - 1, parseInt(day!, 10), hour, parseInt(min!, 10));
+  }
+
+  // Handle "M/D/YYYY" without time
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (mdy) {
+    return new Date(parseInt(mdy[3]!, 10), parseInt(mdy[1]!, 10) - 1, parseInt(mdy[2]!, 10));
+  }
+
+  // Fallback to native Date parsing
+  const d = new Date(s);
   return isNaN(d.getTime()) ? null : d;
 }
 
