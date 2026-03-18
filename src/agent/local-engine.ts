@@ -9,32 +9,37 @@ import type { AppData } from "../db/mongo.js";
 // ---- Helpers ----
 
 function parseDate(val: any): Date | null {
-  if (!val) return null;
-  if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+  try {
+    if (!val) return null;
+    if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
 
-  const s = String(val).trim();
+    const s = String(val).trim();
+    if (!s) return null;
 
-  // Handle "M/D/YYYY, h:mmam/pm" format (e.g., "6/27/2025, 4:43pm")
-  const mdyTime = s.match(
-    /^(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s*(\d{1,2}):(\d{2})\s*(am|pm)?$/i
-  );
-  if (mdyTime) {
-    const [, month, day, year, rawHour, min, ampm] = mdyTime;
-    let hour = parseInt(rawHour!, 10);
-    if (ampm?.toLowerCase() === "pm" && hour < 12) hour += 12;
-    if (ampm?.toLowerCase() === "am" && hour === 12) hour = 0;
-    return new Date(parseInt(year!, 10), parseInt(month!, 10) - 1, parseInt(day!, 10), hour, parseInt(min!, 10));
+    // Handle "M/D/YYYY, h:mm[:ss] am/pm" or "M/D/YYYY h:mm[:ss]am/pm"
+    const mdyTime = s.match(
+      /^(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s*(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)?$/i
+    );
+    if (mdyTime) {
+      const [, month, day, year, rawHour, min, sec, ampm] = mdyTime;
+      let hour = parseInt(rawHour!, 10);
+      if (ampm?.toLowerCase() === "pm" && hour < 12) hour += 12;
+      if (ampm?.toLowerCase() === "am" && hour === 12) hour = 0;
+      return new Date(parseInt(year!, 10), parseInt(month!, 10) - 1, parseInt(day!, 10), hour, parseInt(min!, 10), sec ? parseInt(sec, 10) : 0);
+    }
+
+    // Handle "M/D/YYYY" without time
+    const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (mdy) {
+      return new Date(parseInt(mdy[3]!, 10), parseInt(mdy[1]!, 10) - 1, parseInt(mdy[2]!, 10));
+    }
+
+    // Fallback to native Date parsing
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  } catch {
+    return null;
   }
-
-  // Handle "M/D/YYYY" without time
-  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (mdy) {
-    return new Date(parseInt(mdy[3]!, 10), parseInt(mdy[1]!, 10) - 1, parseInt(mdy[2]!, 10));
-  }
-
-  // Fallback to native Date parsing
-  const d = new Date(s);
-  return isNaN(d.getTime()) ? null : d;
 }
 
 function today(): Date {
@@ -73,13 +78,40 @@ function endOfToday(): Date {
   return d;
 }
 
+function yesterday(): Date {
+  const d = today();
+  d.setDate(d.getDate() - 1);
+  return d;
+}
+
+function endOfYesterday(): Date {
+  const d = today();
+  d.setMilliseconds(-1);
+  return d;
+}
+
+function startOfLastMonth(): Date {
+  const d = today();
+  d.setMonth(d.getMonth() - 1);
+  d.setDate(1);
+  return d;
+}
+
+function endOfLastMonth(): Date {
+  const d = startOfMonth();
+  d.setMilliseconds(-1);
+  return d;
+}
+
 type TimeRange = { start: Date; end: Date };
 
 function parseTimeRange(query: string): TimeRange | null {
   const q = query.toLowerCase();
+  if (q.includes("yesterday")) return { start: yesterday(), end: endOfYesterday() };
   if (q.includes("today")) return { start: today(), end: endOfToday() };
   if (q.includes("this week")) return { start: startOfWeek(), end: endOfToday() };
   if (q.includes("last week")) return { start: startOfLastWeek(), end: endOfLastWeek() };
+  if (q.includes("last month")) return { start: startOfLastMonth(), end: endOfLastMonth() };
   if (q.includes("this month")) return { start: startOfMonth(), end: endOfToday() };
   return null;
 }
@@ -95,6 +127,8 @@ const LOCATIONS = [
   "delhi", "mumbai", "kolkata", "chennai", "pune", "bengaluru", "mangalore",
   "kerala", "jammu", "kangra", "bhubneshwar", "karnal", "rohtak", "jaipur",
   "ajmer", "jalandhar", "vizag", "amritsar", "madurai", "coimbatore",
+  "kochi", "hyderabad", "lucknow", "bhopal", "indore", "chandigarh",
+  "nagpur", "patna", "ranchi", "guwahati", "noida", "gurgaon", "gurugram",
 ];
 
 const STATUSES = [
@@ -158,6 +192,78 @@ function pickFields(docs: Document[], fields: string[]): Record<string, any>[] {
   });
 }
 
+// ---- Collections (nested payment object) parser ----
+
+interface PaymentEntry {
+  date: Date;
+  amount: number;
+  vehicleId?: string;
+  location?: string;
+  riderName?: string;
+}
+
+/**
+ * Extract all payment entries from the nested Collections object.
+ * Structure: { "March": { "Week1": [{ date, amount, ... }], ... }, ... }
+ */
+function extractPayments(doc: Document): PaymentEntry[] {
+  const collections = doc["Collections"];
+  if (!collections || typeof collections !== "object") return [];
+
+  const payments: PaymentEntry[] = [];
+  for (const month of Object.values(collections as Record<string, any>)) {
+    if (!month || typeof month !== "object") continue;
+    for (const week of Object.values(month as Record<string, any>)) {
+      if (!Array.isArray(week)) continue;
+      for (const entry of week) {
+        if (!entry || typeof entry !== "object") continue;
+        const dt = parseDate(entry.date);
+        const amt = Number(entry.amount);
+        if (dt && !isNaN(amt)) {
+          payments.push({
+            date: dt,
+            amount: amt,
+            vehicleId: String(doc["Vehicle ID"] || ""),
+            location: String(doc["Location"] || ""),
+            riderName: String(doc["Rider Name"] || ""),
+          });
+        }
+      }
+    }
+  }
+  return payments;
+}
+
+/**
+ * Sum all payments across docs within an optional date range and location filter.
+ */
+function sumPayments(
+  docs: Document[],
+  range?: TimeRange | null,
+  locationFilter?: string | null,
+): { total: number; count: number; byLocation: Map<string, { total: number; count: number }> } {
+  let total = 0;
+  let count = 0;
+  const byLocation = new Map<string, { total: number; count: number }>();
+
+  for (const doc of docs) {
+    if (locationFilter && !String(doc["Location"] || "").toLowerCase().includes(locationFilter.toLowerCase())) continue;
+    const payments = extractPayments(doc);
+    for (const p of payments) {
+      if (range && (p.date < range.start || p.date > range.end)) continue;
+      total += p.amount;
+      count++;
+      const loc = p.location || "(unknown)";
+      const entry = byLocation.get(loc) || { total: 0, count: 0 };
+      entry.total += p.amount;
+      entry.count++;
+      byLocation.set(loc, entry);
+    }
+  }
+
+  return { total, count, byLocation };
+}
+
 function groupByCount(docs: Document[], field: string): Record<string, number> {
   const groups: Record<string, number> = {};
   for (const d of docs) {
@@ -171,27 +277,32 @@ function groupByCount(docs: Document[], field: string): Record<string, number> {
 
 // ---- Table formatting ----
 
-function toTable(rows: Record<string, any>[], maxRows = 30): string {
+function toTable(rows: Record<string, any>[]): string {
   if (rows.length === 0) return "No data found.";
-  const display = rows.slice(0, maxRows);
-  const first = display[0];
+  const first = rows[0];
   if (!first) return "No data found.";
   const keys = Object.keys(first);
 
   const header = "| " + keys.join(" | ") + " |";
   const sep = "| " + keys.map(() => "---").join(" | ") + " |";
-  const body = display.map(r =>
+  const body = rows.map(r =>
     "| " + keys.map(k => String(r[k] ?? "")).join(" | ") + " |"
   ).join("\n");
 
-  let result = header + "\n" + sep + "\n" + body;
-  if (rows.length > maxRows) result += `\n\n*...showing ${maxRows} of ${rows.length} results*`;
-  return result;
+  return header + "\n" + sep + "\n" + body;
 }
+
+const MAX_DISPLAY_ROWS = 50;
 
 function countResult(label: string, count: number, rows?: Record<string, any>[]): string {
   let result = `**${label}: ${count}**`;
-  if (rows && rows.length > 0) result += "\n\n" + toTable(rows);
+  if (rows && rows.length > 0) {
+    const display = rows.slice(0, MAX_DISPLAY_ROWS);
+    result += "\n\n" + toTable(display);
+    if (rows.length > MAX_DISPLAY_ROWS) {
+      result += `\n\n_Showing ${MAX_DISPLAY_ROWS} of ${rows.length} rows._`;
+    }
+  }
   return result;
 }
 
@@ -210,14 +321,64 @@ const DEPLOY_FIELDS = ["Vehicle ID", "Location", "Your Name", "Created Time", "R
 const RENTAL_FIELDS = ["Vehicle ID", "Location", "Rent Amount", "Rent Due Date", "AmountStatus"];
 const BATTERY_FIELDS = ["Ticket ID", "Battery ID", "Vehicle ID", "Location", "Complain Status", "Issue", "Technician Name", "Created Time"];
 
+// ---- Text normalizer: expand abbreviations, fix typos, standardize phrasing ----
+
+function normalize(q: string): string {
+  let s = q.toLowerCase().trim();
+
+  // Common abbreviations
+  s = s.replace(/\bveh\b/g, "vehicle");
+  s = s.replace(/\bvehicels?\b/g, "vehicle");
+  s = s.replace(/\bvehciles?\b/g, "vehicle");
+  s = s.replace(/\bbatt\b/g, "battery");
+  s = s.replace(/\bbattery's\b/g, "battery");
+  s = s.replace(/\bcomp\b/g, "complaint");
+  s = s.replace(/\bcomplaint's\b/g, "complaint");
+  s = s.replace(/\bcomplain\b/g, "complaint");
+  s = s.replace(/\bcomplians?\b/g, "complaint");
+  s = s.replace(/\bcomplants?\b/g, "complaint");
+  s = s.replace(/\bcomplaits?\b/g, "complaint");
+  s = s.replace(/\bdeploy\b/g, "deployed");
+  s = s.replace(/\bdeployement\b/g, "deployment");
+  s = s.replace(/\bdeploymnet\b/g, "deployment");
+  s = s.replace(/\breturn\b/g, "returned");
+  s = s.replace(/\breturnd\b/g, "returned");
+  s = s.replace(/\bpmts?\b/g, "payment");
+  s = s.replace(/\bpaymnet\b/g, "payment");
+  s = s.replace(/\bpayemnts?\b/g, "payment");
+  s = s.replace(/\bcollctn\b/g, "collection");
+  s = s.replace(/\bcollection\b/g, "collection");
+  s = s.replace(/\bcolletions?\b/g, "collection");
+  s = s.replace(/\btkt\b/g, "ticket");
+  s = s.replace(/\btikects?\b/g, "ticket");
+  s = s.replace(/\bticekts?\b/g, "ticket");
+  s = s.replace(/\btech\b/g, "technician");
+  s = s.replace(/\bloc\b/g, "location");
+  s = s.replace(/\bmaint\b/g, "maintenance");
+  s = s.replace(/\bmaintenace\b/g, "maintenance");
+  s = s.replace(/\bmaintainence\b/g, "maintenance");
+
+  // Natural phrasing → standard
+  s = s.replace(/\bhow much was collected\b/g, "total rent collected");
+  s = s.replace(/\bhow much rent was collected\b/g, "total rent collected");
+  s = s.replace(/\bhow much have we collected\b/g, "total rent collected");
+  s = s.replace(/\btotal amount collected\b/g, "total rent collected");
+  s = s.replace(/\btotal collection amount\b/g, "total collection");
+  s = s.replace(/\btotal rent amount\b/g, "total rent");
+  s = s.replace(/\bhow many are active\b/g, "how many vehicle active");
+  s = s.replace(/\bhow many locked\b/g, "how many vehicle locked");
+
+  return s;
+}
+
 export function localQuery(query: string, data: AppData): string | null {
   const q = query.trim();
-  const lower = q.toLowerCase();
+  const lower = normalize(q);
 
   const vehicleId = extractVehicleId(q);
-  const location = extractLocation(q);
-  const status = extractStatus(q);
-  const timeRange = parseTimeRange(q);
+  const location = extractLocation(lower);
+  const status = extractStatus(lower);
+  const timeRange = parseTimeRange(lower);
   const batteryId = extractBatteryId(q);
 
   // ==============================
@@ -231,27 +392,27 @@ export function localQuery(query: string, data: AppData): string | null {
       let docs = filterByField(data.Rentingdatabase, "Status", "Lock");
       if (location) docs = filterByField(docs, "Location", location);
       if (timeRange) docs = filterByDateRange(docs, "Locked DateTime", timeRange);
-      return countResult("Locked vehicles", docs.length, pickFields(docs.slice(0, 20), RENTAL_FIELDS));
+      return countResult("Locked vehicles", docs.length, pickFields(docs, RENTAL_FIELDS));
     }
 
     if (lower.includes("returned")) {
       let docs = data.Vehiclereturnresponses;
       if (location) docs = filterByField(docs, "Location", location);
       if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
-      return countResult("Vehicles returned", docs.length, pickFields(docs.slice(0, 20), RETURN_FIELDS));
+      return countResult("Vehicles returned", docs.length, pickFields(docs, RETURN_FIELDS));
     }
 
     if (lower.includes("deployed")) {
       let docs = data.Deployementresponses;
       if (location) docs = filterByField(docs, "Location", location);
       if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
-      return countResult("Vehicles deployed", docs.length, pickFields(docs.slice(0, 20), DEPLOY_FIELDS));
+      return countResult("Vehicles deployed", docs.length, pickFields(docs, DEPLOY_FIELDS));
     }
 
     if (status) {
       let docs = filterByField(data.Vehicletracker, "Status", status, true);
       if (location) docs = filterByField(docs, "Location", location);
-      return countResult(`${status} vehicles`, docs.length, pickFields(docs.slice(0, 20), VEHICLE_FIELDS));
+      return countResult(`${status} vehicles`, docs.length, pickFields(docs, VEHICLE_FIELDS));
     }
   }
 
@@ -261,20 +422,20 @@ export function localQuery(query: string, data: AppData): string | null {
       let docs = data.Vehiclereturnresponses;
       if (location) docs = filterByField(docs, "Location", location);
       if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
-      return countResult("Vehicles returned", docs.length, pickFields(docs.slice(0, 30), RETURN_FIELDS));
+      return countResult("Vehicles returned", docs.length, pickFields(docs, RETURN_FIELDS));
     }
 
     if (status) {
       let docs = filterByField(data.Vehicletracker, "Status", status, true);
       if (location) docs = filterByField(docs, "Location", location);
-      return countResult(`${status} vehicles`, docs.length, pickFields(docs.slice(0, 30), VEHICLE_FIELDS));
+      return countResult(`${status} vehicles`, docs.length, pickFields(docs, VEHICLE_FIELDS));
     }
   }
 
   // "Which vehicles are [status]?"
   if (lower.startsWith("which vehicles are") && status) {
     const docs = filterByField(data.Vehicletracker, "Status", status, true);
-    return countResult(`${status} vehicles`, docs.length, pickFields(docs.slice(0, 30), VEHICLE_FIELDS));
+    return countResult(`${status} vehicles`, docs.length, pickFields(docs, VEHICLE_FIELDS));
   }
 
   // "Active vehicles for vendor X" / "Active vehicles for vendor X in Y"
@@ -286,7 +447,7 @@ export function localQuery(query: string, data: AppData): string | null {
       docs = filterByField(docs, "Vendor", vendorMatch[1].trim());
     }
     if (location) docs = filterByField(docs, "Location", location);
-    return countResult(`${status} vehicles`, docs.length, pickFields(docs.slice(0, 30), VEHICLE_FIELDS));
+    return countResult(`${status} vehicles`, docs.length, pickFields(docs, VEHICLE_FIELDS));
   }
 
   // ==============================
@@ -317,7 +478,7 @@ export function localQuery(query: string, data: AppData): string | null {
     let docs = filterByField(data.Deployementresponses, "Vehicle ID", vehicleId);
     if (docs.length === 0) docs = filterByField(data.Vehicletracker, "Vehicle ID", vehicleId);
     if (docs.length === 0) return `No deployment records for ${vehicleId}.`;
-    return toTable(pickFields(docs.slice(0, 3), ["Vehicle ID", "Location", "Created Time", "Your Name"]));
+    return toTable(pickFields(docs, ["Vehicle ID", "Location", "Created Time", "Your Name"]));
   }
 
   // "Rider details for [vehicle_id]"
@@ -364,14 +525,17 @@ export function localQuery(query: string, data: AppData): string | null {
   // COMPLAINT QUERIES (df2)
   // ==============================
 
-  if (lower.startsWith("how many complaint") || lower.startsWith("how many complaints")) {
+  if ((lower.startsWith("how many complaint") || lower.startsWith("how many complaints"))
+      && !lower.includes("battery")) {
     let docs = data.Newcomplaintresponses as Document[];
 
+    // Only filter by purpose when explicitly asking for "resolved" or "new complaints"
     if (lower.includes("resolved")) {
       docs = filterByField(docs, "Purpose of Form Fillup?", "Resolve Complaint");
-    } else if (lower.includes("raised")) {
+    } else if (lower.includes("new complaint")) {
       docs = filterByField(docs, "Purpose of Form Fillup?", "New Complaint");
     }
+    // "raised" without "new" → show all complaints (both new + resolved)
 
     // Operator: "how many complaints did [name] raise/resolve"
     const opMatch = q.match(/did\s+(\w+)\s+(raise|resolve)/i);
@@ -382,30 +546,30 @@ export function localQuery(query: string, data: AppData): string | null {
     if (location) docs = filterByField(docs, "Location", location);
     if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
 
-    return countResult("Complaints", docs.length, pickFields(docs.slice(0, 20), COMPLAINT_FIELDS));
+    return countResult("Complaints", docs.length, pickFields(docs, COMPLAINT_FIELDS));
   }
 
   // "Show complaints raised/resolved [timerange]"
-  if (lower.startsWith("show complaint")) {
+  if (lower.startsWith("show complaint") && !lower.includes("battery")) {
     let docs = data.Newcomplaintresponses as Document[];
 
     if (lower.includes("resolved")) {
       docs = filterByField(docs, "Purpose of Form Fillup?", "Resolve Complaint");
-    } else if (lower.includes("raised")) {
+    } else if (lower.includes("new complaint")) {
       docs = filterByField(docs, "Purpose of Form Fillup?", "New Complaint");
     }
 
     if (location) docs = filterByField(docs, "Location", location);
     if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
 
-    return countResult("Complaints", docs.length, pickFields(docs.slice(0, 30), COMPLAINT_FIELDS));
+    return countResult("Complaints", docs.length, pickFields(docs, COMPLAINT_FIELDS));
   }
 
   // "What was the issue for [vehicle_id]?"
   if (lower.includes("issue for") && vehicleId && !batteryId) {
     const docs = filterByField(data.Newcomplaintresponses, "Vehicle ID", vehicleId);
     if (docs.length === 0) return `No complaints found for ${vehicleId}.`;
-    return toTable(pickFields(docs.slice(0, 5), [...COMPLAINT_FIELDS, "Comments (if any)"]));
+    return toTable(pickFields(docs, [...COMPLAINT_FIELDS, "Comments (if any)"]));
   }
 
   // "Is replacement given for [vehicle_id]?"
@@ -423,7 +587,7 @@ export function localQuery(query: string, data: AppData): string | null {
     );
     if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
     return countResult("Replacements", docs.length,
-      pickFields(docs.slice(0, 20), ["Vehicle ID", "Ticket", "New Vehicle ID", "Created Time"]));
+      pickFields(docs, ["Vehicle ID", "Ticket", "New Vehicle ID", "Created Time"]));
   }
 
   // ==============================
@@ -434,7 +598,7 @@ export function localQuery(query: string, data: AppData): string | null {
   if (lower.includes("returned") && lower.includes("why") && vehicleId) {
     const docs = filterByField(data.Vehiclereturnresponses, "Vehicle ID", vehicleId);
     if (docs.length === 0) return `No return records for ${vehicleId}.`;
-    return toTable(pickFields(docs.slice(0, 5), ["Vehicle ID", "Created Time", "Reason of return", "Location", "Your Name"]));
+    return toTable(pickFields(docs, ["Vehicle ID", "Created Time", "Reason of return", "Location", "Your Name"]));
   }
 
   // "Which operator returned how many vehicles?"
@@ -454,7 +618,7 @@ export function localQuery(query: string, data: AppData): string | null {
     let docs = data.Deployementresponses as Document[];
     if (location) docs = filterByField(docs, "Location", location);
     if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
-    return countResult("Deployed vehicles", docs.length, pickFields(docs.slice(0, 30), DEPLOY_FIELDS));
+    return countResult("Deployed vehicles", docs.length, pickFields(docs, DEPLOY_FIELDS));
   }
 
   // "Which operator deployed how many vehicles?"
@@ -498,7 +662,7 @@ export function localQuery(query: string, data: AppData): string | null {
       return due && due >= range.start && due <= range.end;
     });
     return countResult("Riders due", docs.length,
-      pickFields(docs.slice(0, 20), ["Vehicle ID", "Rider Name", "Rent Due Date", "Location"]));
+      pickFields(docs, ["Vehicle ID", "Rider Name", "Rent Due Date", "Location"]));
   }
 
   // "What's the due date for [vehicle_id]?"
@@ -519,7 +683,7 @@ export function localQuery(query: string, data: AppData): string | null {
   if (lower.includes("how many payment")) {
     let docs = data.Rentingdatabase as Document[];
     if (timeRange) docs = filterByDateRange(docs, "Last_Modified_Time", timeRange);
-    return countResult("Payments", docs.length, pickFields(docs.slice(0, 20), RENTAL_FIELDS));
+    return countResult("Payments", docs.length, pickFields(docs, RENTAL_FIELDS));
   }
 
   // "What's the total payment collected for [vehicle_id]?"
@@ -531,29 +695,116 @@ export function localQuery(query: string, data: AppData): string | null {
       toTable(pickFields(docs, ["Vehicle ID", "Rent Amount", "AmountStatus", "Rent Due Date"]));
   }
 
+  // "Total rent collected [timerange]" / "Total collections [timerange]" / "How much rent collected [timerange]"
+  if ((lower.includes("total rent") || lower.includes("total collection") || lower.includes("rent collected")
+      || lower.includes("collection amount") || lower.includes("payment collected")
+      || (lower.includes("total payment") && !vehicleId)
+      || (lower.includes("how much") && (lower.includes("collect") || lower.includes("rent") || lower.includes("payment"))))
+      && !vehicleId) {
+    const docs = data.Rentingdatabase as Document[];
+    const { total, count, byLocation } = sumPayments(docs, timeRange, location);
+
+    const periodLabel = timeRange
+      ? (lower.includes("last month") ? "last month"
+        : lower.includes("this month") ? "this month"
+        : lower.includes("this week") ? "this week"
+        : lower.includes("last week") ? "last week"
+        : lower.includes("today") ? "today"
+        : lower.includes("yesterday") ? "yesterday"
+        : "selected period")
+      : "all time";
+
+    let result = `**Total Rent Collected (${periodLabel}${location ? ` - ${location}` : ""}): ₹${total.toLocaleString("en-IN")}**\n\n`;
+    result += `_${count} payments across ${byLocation.size} locations_\n\n`;
+
+    if (byLocation.size > 1) {
+      const rows = Array.from(byLocation.entries())
+        .sort((a, b) => b[1].total - a[1].total)
+        .map(([loc, v]) => ({
+          Location: loc,
+          "Amount Collected": `₹${v.total.toLocaleString("en-IN")}`,
+          Payments: v.count,
+        }));
+      result += toTable(rows);
+    }
+    return result;
+  }
+
+  // "Rent summary [location]" / "Collection summary [timerange]"
+  if ((lower.includes("rent summary") || lower.includes("collection summary")
+      || lower.includes("payment summary")) && !vehicleId) {
+    const docs = data.Rentingdatabase as Document[];
+    const { total, count, byLocation } = sumPayments(docs, timeRange, location);
+
+    const rows = Array.from(byLocation.entries())
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([loc, v]) => ({
+        Location: loc,
+        "Amount Collected": `₹${v.total.toLocaleString("en-IN")}`,
+        Payments: v.count,
+      }));
+
+    return `**Rent Collection Summary — ₹${total.toLocaleString("en-IN")} total (${count} payments):**\n\n` + toTable(rows);
+  }
+
+  // "Overdue payments [location]" / "Unpaid rent [timerange]"
+  if (lower.includes("overdue") || (lower.includes("unpaid") && lower.includes("rent"))) {
+    const now = new Date();
+    let docs = data.Rentingdatabase.filter(d => {
+      const due = parseDate(d["Rent Due Date"]);
+      return due && due < now;
+    });
+    if (location) docs = filterByField(docs, "Location", location);
+    return countResult("Overdue payments", docs.length,
+      pickFields(docs, ["Vehicle ID", "Rider Name", "Rent Amount", "Rent Due Date", "AmountStatus", "Location"]));
+  }
+
   // ==============================
   // BATTERY COMPLAINT QUERIES (df6)
   // ==============================
+
+  // "How many battery complaints [resolved/pending] [timerange]?"
+  // "How many resolved battery complaints this month?"
+  // "Show resolved battery complaints" etc.
+  if (lower.includes("battery complaint") || lower.includes("battery tickets")
+      || (lower.includes("battery") && lower.includes("complaint"))) {
+    let docs = data.Complaindatabase as Document[];
+    let label = "Battery complaints";
+
+    if (lower.includes("resolved")) {
+      docs = filterByField(docs, "Complain Status", "Resolved", true);
+      label = "Resolved battery complaints";
+    } else if (lower.includes("pending")) {
+      docs = filterByField(docs, "Complain Status", "Pending", true);
+      label = "Pending battery complaints";
+    }
+
+    if (location) docs = filterByField(docs, "Location", location);
+    if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
+
+    return countResult(label, docs.length,
+      pickFields(docs, [...BATTERY_FIELDS, "Resolved Type", "Resolved timestamp"]));
+  }
 
   // "How many tickets have been raised for battery [id]?"
   if (batteryId && lower.includes("ticket")) {
     const docs = filterByField(data.Complaindatabase, "Battery ID", batteryId);
     return countResult(`Tickets for ${batteryId}`, docs.length,
-      pickFields(docs.slice(0, 10), BATTERY_FIELDS));
+      pickFields(docs, BATTERY_FIELDS));
   }
 
   // "What is the complaint status of battery [id]?"
   if (batteryId && lower.includes("status")) {
     const docs = filterByField(data.Complaindatabase, "Battery ID", batteryId);
     if (docs.length === 0) return `No records for battery ${batteryId}.`;
-    return toTable(pickFields(docs.slice(0, 5), ["Battery ID", "Vehicle ID", "Complain Status", "Issue", "Created Time"]));
+    return toTable(pickFields(docs, ["Battery ID", "Vehicle ID", "Complain Status", "Issue", "Created Time"]));
   }
 
   // "What is the issue for battery [id]?"
   if (batteryId && lower.includes("issue")) {
     const docs = filterByField(data.Complaindatabase, "Battery ID", batteryId);
     if (docs.length === 0) return `No records for battery ${batteryId}.`;
-    return toTable(pickFields(docs.slice(0, 5), ["Battery ID", "Vehicle ID", "Issue", "Complain Status", "Solution", "Created Time"]));
+    return toTable(pickFields(docs, ["Battery ID", "Vehicle ID", "Issue", "Complain Status", "Solution", "Created Time"]));
   }
 
   // "What is the location of battery [id]?"
@@ -585,7 +836,7 @@ export function localQuery(query: string, data: AppData): string | null {
     if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
 
     return countResult("Pending tickets", docs.length,
-      pickFields(docs.slice(0, 20), BATTERY_FIELDS));
+      pickFields(docs, BATTERY_FIELDS));
   }
 
   // "How many batteries were replaced [timerange]?"
@@ -593,7 +844,7 @@ export function localQuery(query: string, data: AppData): string | null {
     let docs = filterByField(data.Complaindatabase, "Resolved Type", "Replace");
     if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
     return countResult("Batteries replaced", docs.length,
-      pickFields(docs.slice(0, 20), [...BATTERY_FIELDS, "Resolved Type"]));
+      pickFields(docs, [...BATTERY_FIELDS, "Resolved Type"]));
   }
 
   // "Which technician resolved the most battery complaints?"
@@ -637,6 +888,156 @@ export function localQuery(query: string, data: AppData): string | null {
     const total = docs.reduce((sum, d) => sum + (Number(d["Ticket closure time (in days)"]) || 0), 0);
     const avg = total / docs.length;
     return `**Average ticket closure time: ${avg.toFixed(1)} days** (based on ${docs.length} resolved tickets)`;
+  }
+
+  // ==============================
+  // BROAD CATCH-ALL PATTERNS
+  // ==============================
+
+  // "Total vehicles" / "How many total vehicles"
+  if ((lower.includes("total vehicle") || lower === "how many vehicles" || lower === "how many vehicles?")
+      && !status) {
+    let docs = data.Vehicletracker as Document[];
+    if (location) docs = filterByField(docs, "Location", location);
+    return countResult("Total vehicles", docs.length, pickFields(docs, VEHICLE_FIELDS));
+  }
+
+  // "Location wise count/breakdown" / "Vehicles by location"
+  if ((lower.includes("location wise") || lower.includes("location-wise")
+      || lower.includes("by location") || lower.includes("locationwise"))
+      && (lower.includes("vehicle") || lower.includes("count") || lower.includes("breakdown"))) {
+    const groups = groupByCount(data.Vehicletracker, "Location");
+    return groupTable(groups, "Location");
+  }
+
+  // "Status wise breakdown" / "Vehicle status breakdown"
+  if ((lower.includes("status wise") || lower.includes("status-wise") || lower.includes("status breakdown"))
+      && !lower.includes("battery") && !lower.includes("complaint")) {
+    const groups = groupByCount(data.Vehicletracker, "Status");
+    return groupTable(groups, "Status");
+  }
+
+  // "Complaints by location" / "Location wise complaints"
+  if ((lower.includes("location wise") || lower.includes("by location"))
+      && lower.includes("complaint") && !lower.includes("battery")) {
+    let docs = data.Newcomplaintresponses as Document[];
+    if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
+    const groups = groupByCount(docs, "Location");
+    return groupTable(groups, "Location");
+  }
+
+  // "Battery complaints by location" / "Location wise battery complaints"
+  if ((lower.includes("location wise") || lower.includes("by location"))
+      && (lower.includes("battery") || lower.includes("ticket"))) {
+    let docs = data.Complaindatabase as Document[];
+    if (lower.includes("resolved")) docs = filterByField(docs, "Complain Status", "Resolved", true);
+    if (lower.includes("pending")) docs = filterByField(docs, "Complain Status", "Pending", true);
+    if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
+    const groups = groupByCount(docs, "Location");
+    return groupTable(groups, "Location");
+  }
+
+  // "Returns by location"
+  if ((lower.includes("location wise") || lower.includes("by location")) && lower.includes("return")) {
+    let docs = data.Vehiclereturnresponses as Document[];
+    if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
+    const groups = groupByCount(docs, "Location");
+    return groupTable(groups, "Location");
+  }
+
+  // "Deployments by location"
+  if ((lower.includes("location wise") || lower.includes("by location")) && lower.includes("deploy")) {
+    let docs = data.Deployementresponses as Document[];
+    if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
+    const groups = groupByCount(docs, "Location");
+    return groupTable(groups, "Location");
+  }
+
+  // "Total complaints" / "How many total complaints"
+  if ((lower.includes("total complaint") || lower === "how many complaints" || lower === "how many complaints?")
+      && !lower.includes("battery")) {
+    let docs = data.Newcomplaintresponses as Document[];
+    if (location) docs = filterByField(docs, "Location", location);
+    if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
+    return countResult("Total complaints", docs.length, pickFields(docs, COMPLAINT_FIELDS));
+  }
+
+  // "Total battery complaints" / "How many total battery complaints"
+  if (lower.includes("total battery") || (lower.includes("total") && lower.includes("battery") && lower.includes("complaint"))) {
+    let docs = data.Complaindatabase as Document[];
+    if (location) docs = filterByField(docs, "Location", location);
+    if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
+    return countResult("Total battery complaints", docs.length, pickFields(docs, BATTERY_FIELDS));
+  }
+
+  // "Total returns" / "How many returns"
+  if (lower.includes("total return") || (lower.includes("how many") && lower.includes("return") && !lower.includes("vehicle"))) {
+    let docs = data.Vehiclereturnresponses as Document[];
+    if (location) docs = filterByField(docs, "Location", location);
+    if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
+    return countResult("Total returns", docs.length, pickFields(docs, RETURN_FIELDS));
+  }
+
+  // "Total deployments" / "How many deployments"
+  if (lower.includes("total deployment") || (lower.includes("how many") && lower.includes("deployment"))) {
+    let docs = data.Deployementresponses as Document[];
+    if (location) docs = filterByField(docs, "Location", location);
+    if (timeRange) docs = filterByDateRange(docs, "Created Time", timeRange);
+    return countResult("Total deployments", docs.length, pickFields(docs, DEPLOY_FIELDS));
+  }
+
+  // "Dashboard" / "Fleet summary" / "Overview"
+  if (lower === "dashboard" || lower === "fleet summary" || lower === "overview" || lower === "summary") {
+    const active = filterByField(data.Vehicletracker, "Status", "Active", true).length;
+    const maintenance = filterByField(data.Vehicletracker, "Status", "Under Maintenance", true).length;
+    const locked = filterByField(data.Rentingdatabase, "Status", "Lock").length;
+    const ready = filterByField(data.Vehicletracker, "Status", "Ready to Deploy", true).length;
+
+    const todayRange = { start: today(), end: endOfToday() };
+    const complaintsToday = filterByDateRange(data.Newcomplaintresponses, "Created Time", todayRange).length;
+    const returnsToday = filterByDateRange(data.Vehiclereturnresponses, "Created Time", todayRange).length;
+    const deploysToday = filterByDateRange(data.Deployementresponses, "Created Time", todayRange).length;
+    const pendingTickets = filterByField(data.Complaindatabase, "Complain Status", "Pending").length;
+
+    let result = `**Fleet Dashboard**\n\n`;
+    result += `| Metric | Count |\n| --- | --- |\n`;
+    result += `| Total Vehicles | ${data.Vehicletracker.length} |\n`;
+    result += `| Active | ${active} |\n`;
+    result += `| Under Maintenance | ${maintenance} |\n`;
+    result += `| Locked | ${locked} |\n`;
+    result += `| Ready to Deploy | ${ready} |\n`;
+    result += `| Complaints Today | ${complaintsToday} |\n`;
+    result += `| Returns Today | ${returnsToday} |\n`;
+    result += `| Deployments Today | ${deploysToday} |\n`;
+    result += `| Pending Battery Tickets | ${pendingTickets} |\n`;
+    result += `| Total Riders | ${data.Rentingdatabase.length} |\n`;
+    return result;
+  }
+
+  // "Rent of [vehicle_id]" / "Rent amount for [vehicle_id]"
+  if ((lower.includes("rent of") || lower.includes("rent for") || lower.includes("rent amount")) && vehicleId) {
+    const docs = filterByField(data.Rentingdatabase, "Vehicle ID", vehicleId);
+    if (docs.length === 0) return `No rental records for ${vehicleId}.`;
+    return toTable(pickFields(docs.slice(0, 1), ["Vehicle ID", "Rider Name", "Rent Amount", "Rent Due Date", "AmountStatus", "Status", "Location"]));
+  }
+
+  // "Rider for [vehicle_id]" / "Who rides [vehicle_id]"
+  if ((lower.includes("rider for") || lower.includes("who rides") || lower.includes("rider of")) && vehicleId) {
+    const docs = filterByField(data.Vehicletracker, "Vehicle ID", vehicleId);
+    if (docs.length === 0) return `No records found for vehicle ${vehicleId}.`;
+    return toTable(pickFields(docs.slice(0, 1), ["Vehicle ID", "Rider Name", "Rider Contact No", "Location", "Status"]));
+  }
+
+  // "Status of [vehicle_id]"
+  if (lower.includes("status of") && vehicleId) {
+    const tracker = filterByField(data.Vehicletracker, "Vehicle ID", vehicleId);
+    if (tracker.length === 0) return `No records found for vehicle ${vehicleId}.`;
+    const rental = filterByField(data.Rentingdatabase, "Vehicle ID", vehicleId);
+    let result = toTable(pickFields(tracker.slice(0, 1), ["Vehicle ID", "Status", "Location", "Vendor", "Rider Name"]));
+    if (rental.length > 0) {
+      result += "\n\n**Rental:**\n" + toTable(pickFields(rental.slice(0, 1), ["Rent Amount", "AmountStatus", "Rent Due Date", "Status"]));
+    }
+    return result;
   }
 
   // No match — fall through to LLM
