@@ -12,7 +12,27 @@
       "Bash(timeout 15 npx tsx src/server.ts)",
       "Bash(timeout 18 npx tsx src/server.ts)",
       "Bash(timeout 10 npx tsx src/server.ts)",
-      "Bash(timeout 12 npx tsx src/server.ts)"
+      "Bash(timeout 12 npx tsx src/server.ts)",
+      "Bash(npm run:*)",
+      "Bash(nslookup:*)",
+      "Bash(ping -n 2 google.com)",
+      "Bash(netstat -ano)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm create:*)",
+      "Bash(npx vite:*)",
+      "Bash(PGPASSWORD=npg_sOApBDcZb1h6 psql \"postgresql://neondb_owner:npg_sOApBDcZb1h6@ep-old-tooth-a1gga0gk-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" -c \"SELECT id, name FROM roles WHERE name = ''admin'';\" -c \"SELECT id, name FROM org_nodes WHERE name = ''EMO Electric'';\")",
+      "Bash(timeout 20 npx tsx src/server.ts)",
+      "Bash(npx shadcn@latest init -d)",
+      "Bash(npx shadcn@latest init -d -y)",
+      "Bash(npx shadcn@latest add input card dialog dropdown-menu sheet separator avatar badge tooltip textarea scroll-area -y)",
+      "Bash(npx shadcn@latest add input card dialog dropdown-menu sheet separator avatar badge tooltip textarea scroll-area -y -o)",
+      "Bash(npx tsx:*)",
+      "Bash(mkdir:*)",
+      "Bash(node -pe \"JSON.parse\\(require\\(''''fs''''\\).readFileSync\\(0,''''utf8''''\\)\\).version\")",
+      "Bash(node -e \":*)",
+      "Bash(docker build:*)",
+      "WebSearch"
     ]
   }
 }

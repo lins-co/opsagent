@@ -1,0 +1,448 @@
+Vehicle ID,Rider Name,Status,Location,Balance Amount,Rent Start Date,Rent Amount
+DL4GD8980,Beera yadav,Lock,Delhi,0.5,3/25/2026,1250
+DL4SDY3404,Pradeep Kumar ,Active,Delhi,1250,3/26/2026,1250
+KA03KW6977,Manohar patel ,Lock,Delhi,0.5,3/23/2026,1250
+KA04KS4242,Sumit Tiwari,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY2604,Suraj kumar ,Active,Delhi,0.5,3/23/2026,1250
+DLXE0871,ROHAN,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY2737,Ranjan ,Active,Delhi,1250,3/26/2026,1250
+KA50EN3479,Veeranjaneyulu,Lock,Bengaluru,0.5,3/25/2026,1250
+KA03KW6883,MOHIT PATEL,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3831,SUDAKAR TAMATA,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3742,Pradip,Active,Bengaluru,1250,3/27/2026,1250
+KA50EN3729,NISHANTH KUMAR,Lock,Bengaluru,0.5,3/23/2026,1250
+KA50EN3802,NIMSANGAY,Active,Bengaluru,1250,3/26/2026,1250
+KA03KW6785,Rajnish yadav ,Active,Bengaluru,1250,3/26/2026,1250
+KA03KW7101,Mahendra Singh ,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4SDY2797,Sagar Ali,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY2766,Anoop kumar,Lock,Delhi,0.5,3/23/2026,1250
+KA03KW7071,SHIV NARAYAN BARIK,Lock,Bengaluru,0.5,3/23/2026,1250
+KA50EN3734,Srikanth ,Lock,Bengaluru,0.5,3/24/2026,1250
+KA50EN3849,MAYADHAR BISWAL,Lock,Bengaluru,0.5,3/25/2026,1250
+KAOD3194,Subrato nayak,Active,Bengaluru,1250,3/26/2026,1250
+KAOD3198,KUSH KUMAR,Active,Bengaluru,1250,3/27/2026,1250
+KA50EN3579,Yeshwanth ,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4SDY2745,VIKKU KUMAR,Lock,Delhi,0.5,3/25/2026,1250
+KA50EN3482,Sabir,Lock,Bengaluru,0.5,3/23/2026,1250
+DL4SDY2646,MASUM ALI,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY3645,Md chand ,Lock,Delhi,0.5,3/24/2026,1250
+KA04KS4223,GIPIT PAL,Active,Bengaluru,1250,3/28/2026,1250
+DL4SDY2704,VINAY KUMAR,Lock,Delhi,0.5,3/23/2026,1250
+KA50EN3634,Avdhesh kumar,Lock,Delhi,0.5,3/25/2026,1250
+DL4SDY2931,NEERAJ KUMAR,Active,Delhi,1250,3/26/2026,1250
+DL4SDY3674,Ajit Paswan,Active,Delhi,1250,3/27/2026,1250
+KA50EN3683,SK JUL MOHAMMED,Active,Bengaluru,1250,3/27/2026,1250
+KA50EN3624,VAdarsh,Active,Bengaluru,1250,3/26/2026,1250
+DL4SDY2672,Preetam Chaudhary ,Lock,Delhi,0.5,3/23/2026,1250
+DL4SDY2980,DEEPU PAL,Lock,Delhi,0.5,3/23/2026,1250
+KA03KW7055,B MADHU,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4GD9204,Ajay Kumar ,Lock,Delhi,0.5,3/25/2026,1250
+KA03KW6925,BHARATH KUMAR,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4SDY3641,Narendra pal ,Active,Delhi,1500,3/27/2026,1500
+KA50EN3637,Rajendera kumar ,Active,Delhi,1250,3/27/2026,1250
+DL4SDY2714,Ajay ,Active,Delhi,1250,3/28/2026,1250
+KA03KW6951,Rajashekhar s ,Lock,Bengaluru,0.5,3/23/2026,1250
+DL4SDY2660,Kaushal Kumar ,Active,Delhi,1250,3/26/2026,1250
+KA03KW7094,ABHIMANU,Active,Bengaluru,1250,3/26/2026,1250
+DL4SDY2754,RIPAN SHEK,Lock,Delhi,0.5,3/24/2026,1250
+KA03KW6369,SUNIL KEWAT,Active,Bengaluru,1250,3/26/2026,1250
+DL4SDY2725,Hiralal,Active,Delhi,1250,3/27/2026,1250
+KA50EN3792,Ranjeet,Lock,Delhi,0.5,3/23/2026,1250
+KA50EN3815,Varun kumar sharma,Lock,Bengaluru,0.5,3/24/2026,1250
+KA50EN3633,Dibakar pradhan,Lock,Bengaluru,0.5,3/24/2026,1250
+DLXE0872,LAXMAN DAS,Lock,Delhi,0.5,3/25/2026,1250
+DL4SDY3498,Ankit Awsthi ,Lock,Delhi,0.5,3/25/2026,1250
+DL4SDY2641,Aryan,Lock,Delhi,0.5,3/24/2026,1250
+KA50EN3791,Sita ram ,Active,Delhi,1250,3/27/2026,1250
+KA03KW6889,Sadiq,Lock,Bengaluru,0.5,3/24/2026,1250
+KA03KW6364,Ranjan rajbanshi,Lock,Bengaluru,0.5,3/23/2026,1250
+DL4SDY2788,Pawan,Lock,Delhi,0.5,3/24/2026,1250
+KA03KW6807,Mo athesham,Lock,Delhi,0.5,3/24/2026,1250
+KA50EN3554,Shrikantgowda,Active,Bengaluru,1250,3/27/2026,1250
+KA50EN3659,Anupdebnath,Active,Bengaluru,1750,3/26/2026,1750
+KA03KW6748,RAJ KUMAR,Lock,Delhi,0.5,3/23/2026,1250
+KA50EN3591,Sohidur rahman ,Active,Bengaluru,1250,3/27/2026,1250
+DL4SDY3463,Md Khursid aalam,Lock,Delhi,0.5,3/25/2026,1250
+DL4SDY2955,Ashok,Active,Delhi,1250,3/27/2026,1250
+KA04KS4214,MAHFUZ ANSARI ,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3626,Parashuram ,Lock,Bengaluru,0.5,3/25/2026,1250
+KA03KW6937,Kunal paul,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3575,Mahesh kumar k p,Active,Bengaluru,1250,3/27/2026,1250
+KA50EN3801,Bhabani sankar behera,Active,Bengaluru,1250,3/27/2026,1250
+DL4GD9377,Niranjan,Active,Delhi,1250,3/27/2026,1250
+DL4SDY3648,Suraj ,Lock,Delhi,0.5,3/24/2026,1250
+KA50EN3666,MARUTHI,Lock,Bengaluru,0.5,3/25/2026,1250
+KA50EN3570,Mohammad raziullah,Active,Bengaluru,1250,3/26/2026,1250
+DL4SDY2709,Rajesh kumar,Lock,Delhi,0.5,3/24/2026,1250
+KA03KW6963,Subodh Kumar yadav ,Active,Bengaluru,1250,3/26/2026,1250
+DLOD3201,Raushan roy,Active,Delhi,1250,3/26/2026,1250
+KA03KW6871,FUZAYEL AHMED,Lock,Bengaluru,0.5,3/23/2026,1250
+KA03KW6836,Premchand yadav ,Active,Delhi,1250,3/27/2026,1250
+KA03KW6976,Akash singh,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY2774,Swapan Das ,Active,Delhi,1250,3/26/2026,1250
+KA04KS4194,Rajan Kumar ,Lock,Delhi,0.5,3/23/2026,1250
+KA03KW7089,Shashank,Lock,Bengaluru,0.5,3/25/2026,1250
+KA03KW6756,Sujan Das ,Active,Bengaluru,1250,3/27/2026,1250
+KA50EN3553,Aakash ,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4GD9132,Anurag Kumar,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY3623,Sanjeev Kumar Gupta ,Active,Delhi,1250,3/26/2026,1250
+DL4GD9212,Sannabi sk ,Lock,Delhi,0.5,3/23/2026,1250
+DL4SDY2642,Dharam Chandra yadav,Active,Delhi,1250,3/27/2026,1250
+KA50EN3568,Prashant Kumar,Lock,Bengaluru,0.5,3/23/2026,1250
+DL4SDY2932,Sashi,Lock,Delhi,0.5,3/23/2026,1250
+KA50EN3685,Puneesh patel ,Lock,Bengaluru,0.5,3/23/2026,1250
+KA03KW6943,Satish kushwaha ,Lock,Bengaluru,0.5,3/23/2026,1250
+KA04KS4266,Ravindra Kumar ,Lock,Delhi,0.5,3/25/2026,1250
+KA03KW7028,Sandeep giri,Lock,Delhi,0.5,3/25/2026,1250
+DL4SDY3444,Anil Kumar,Active,Delhi,1250,3/26/2026,1250
+KA03KW7036,Rohit krushanji suranshe,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3665,Golam Rabbani,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3673,Rohit,Active,Bengaluru,1250,3/28/2026,1250
+DL4GD9565,Amit kumar ,Lock,Delhi,0.5,3/23/2026,1250
+DL4SEA6165,Nadeem Anshari,Active,Delhi,1500,3/27/2026,1500
+KA03KW7042,Navateja A,Active,Bengaluru,1250,3/27/2026,1250
+DL4GD9340,Lokendra ,Active,Delhi,1250,3/27/2026,1250
+DL4SEA6183,Dileep ,Lock,Delhi,250.5,3/23/2026,1500
+DL4SEA6151,Ashish Kumar Pal,Active,Delhi,1500,3/27/2026,1500
+KA50EN3642,Abu Saeed ,Active,Bengaluru,1250,3/29/2026,1250
+KA50EN3647,Mangal,Lock,Bengaluru,0.5,3/23/2026,1250
+KA50EN3559,Surendra Dahiya,Lock,Bengaluru,0.5,3/23/2026,1250
+DL4SEA6050,Krishna Mali,Lock,Delhi,250.5,3/24/2026,1500
+KA03KW6965,Abhisek K A,Lock,Bengaluru,0.5,3/23/2026,1250
+KA50EN3630,Indrajit Golder,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3628,Maneesh kumar patel ,Active,Bengaluru,1250,3/26/2026,1250
+DL4SEA6121,Naresh Kumar pal ,Lock,Delhi,250.5,3/24/2026,1500
+DL4SEA6202,Sachin pal,Lock,Delhi,250.5,3/23/2026,1500
+DL4SEA6178,Chatrapal,Lock,Delhi,250.5,3/24/2026,1500
+DL4SEA6164,Dileep kumar,Active,Delhi,1500,3/26/2026,1500
+DL4SEA6172,Anil pal ,Lock,Delhi,250.5,3/24/2026,1500
+KA50EN3785,Ravi Kumar ,Active,Delhi,1250,3/26/2026,1250
+DL4GD9566,Dipak kumar pal,Active,Delhi,1250,3/26/2026,1250
+DL4SEA6169,Shivpoojan Raikwar,Active,Delhi,1500,3/26/2026,1500
+DL4SEA6186,Harkesh kumar pal ,Active,Delhi,1500,3/28/2026,1500
+DLXE0861,Guljarul Haque,Lock,Delhi,0.5,3/24/2026,1250
+DL4SEA6089,Md sarfuddin ansari ,Lock,Delhi,750.5,3/23/2026,2000
+KA03KW7075,Sakthivel,Active,Bengaluru,1250,3/26/2026,1250
+DL4SEA6142,Babu pal,Lock,Delhi,250.5,3/24/2026,1500
+KA04KS4219,Sandeep Kumar Kushwaha ,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4SEA6272,Dharmendra pal ,Lock,Delhi,250.5,3/23/2026,1500
+KA04KS4281,ANTHONY RAJ G,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4SEA6256,Sachin kumar tyagi,Active,Delhi,2000,3/26/2026,2000
+KA04KS4222,nikhil kumar ravat,Lock,Bengaluru,0.5,3/23/2026,1250
+KA03KW6927,Narendra vishwakrma ,Lock,Bengaluru,0.5,3/24/2026,1250
+KA03KW6833,Jahidul islam,Lock,Bengaluru,0.5,3/24/2026,1250
+KA03KW7005,KAMLESHWAR DAHIYA,Lock,Bengaluru,0.5,3/24/2026,1250
+KA50EN3519,VIJAY KUMAR,Lock,Bengaluru,0.5,3/24/2026,1250
+KA50EN3643,Vishnu Vardhana Rao,Active,Bengaluru,1250,3/27/2026,1250
+KA50EN3508,Rahulkumar,Lock,Bengaluru,0.5,3/25/2026,1250
+KA50EN3522,Saurabh kewat,Active,Bengaluru,1250,3/27/2026,1250
+DL4SEA6010,MD FRADIN,Lock,Delhi,250.5,3/24/2026,1500
+DL4SEA6026,Ramchandra nungar,Lock,Delhi,250.5,3/25/2026,1500
+KA50EN3629,Selvavinayagam g,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4SEA6105,Subrata biswas ,Lock,Delhi,250.5,3/23/2026,1500
+KA50EN3574,SANATGANGULY,Active,Bengaluru,1250,3/28/2026,1250
+KA03KW6830,Roshaniyer,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4SEA6159,Mohd shamshad,Lock,Delhi,250.5,3/25/2026,1500
+DL4SEA6246,Ramprsad ,Lock,Delhi,250.5,3/25/2026,1500
+DL4SEA6099,Ankit pal,Active,Delhi,1500,3/27/2026,1500
+DL4SDY3650,Panchu gopal,Lock,Delhi,0.5,3/25/2026,1250
+DL4SEA6199,Ravi ,Active,Delhi,1500,3/26/2026,1500
+KA04KS4307,KHALANDAR,Lock,Bengaluru,0.5,3/24/2026,1250
+KA04KS4316,abdul halim,Active,Bengaluru,1250,3/26/2026,1250
+DL4SEA6053,Arun kumar ,Active,Delhi,1500,3/27/2026,1500
+DL4SDY2673,Surendra pal ,Lock,Delhi,0.5,3/23/2026,1250
+DL4SEA6156,Ravindra Kumar ,Lock,Delhi,250.5,3/23/2026,1500
+DL4SEA6267,Govind pal,Lock,Delhi,250.5,3/25/2026,1500
+KA04KS4259,Anil kumar ,Active,Bengaluru,1250,3/26/2026,1250
+KA04KS4168,boyauseni,Active,Bengaluru,1250,3/26/2026,1250
+DL4SDY3334,Shivam Singh,Lock,Delhi,0.5,3/23/2026,1250
+DL4SEA6158,Ram chandra ,Lock,Delhi,250.5,3/23/2026,1500
+DL4SEA6277,Manoj kumar Gupta ,Lock,Delhi,250.5,3/25/2026,1500
+KA50EN3576,Neeraj dahiya,Lock,Bengaluru,0.5,3/23/2026,1250
+DL4SEA6258,Kapil Kumar nigam ,Lock,Delhi,250.5,3/25/2026,1500
+DL4SDY2650,Mrinal hossain,Lock,Delhi,0.5,3/24/2026,1250
+DL4SEA6107,Bhulan sheikh,Lock,Delhi,250.5,3/24/2026,1500
+DL4SEA6250,Rinku singh ,Active,Delhi,1500,3/26/2026,1500
+DL4SEA6148,Badde pal ,Lock,Delhi,250.5,3/23/2026,1500
+DL4SEA6225,Pushkar awasthi ,Lock,Delhi,250.5,3/25/2026,1500
+DLXE0851,Gopal kumar bhaskar,Lock,Delhi,0.5,3/25/2026,1250
+DL4SEA6201,Sonu kumar singh ,Active,Delhi,1500,3/27/2026,1500
+DL4SDY2689,Surendra pal ,Lock,Delhi,0.5,3/24/2026,1250
+DL4SEA6115,Bhairamdeen pal ,Lock,Delhi,250.5,3/24/2026,1500
+DL4SEA6242,Ramlakhan pal ,Active,Delhi,1500,3/26/2026,1500
+KA50EN3758,Yogesh jat,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY2925,Rajesh Kumar pal ,Active,Delhi,1250,3/27/2026,1250
+DL4SEA6224,Anuj pal ,Lock,Delhi,250.5,3/24/2026,1500
+DL4SDY2610,Brichh kumar yadav,Active,Delhi,1250,3/27/2026,1250
+KA50EN3761,Lalit viswakarma ,Lock,Delhi,0.5,3/23/2026,1250
+KA03KW6811,NAZRUL ISLAM,Lock,Bengaluru,0.5,3/23/2026,1250
+DL4SEA6271,Rajkishor Ahirwar ,Lock,Delhi,250.5,3/23/2026,1500
+DL4SDY2952,Govind baghel ,Active,Delhi,1250,3/27/2026,1250
+DL4SDY3659,Ramanand ,Active,Delhi,1250,3/26/2026,1250
+DL4SEA6128,Ravi,Lock,Delhi,250.5,3/23/2026,1500
+KA03KW7069,Ankit rajput,Active,Delhi,1250,3/26/2026,1250
+DL4SDY2944,Deendayal Ahirwar ,Active,Delhi,1250,3/27/2026,1250
+KA03KW6842,Yash karan ,Lock,Delhi,0.5,3/24/2026,1250
+DL4SEA6137,Sanoj,Lock,Delhi,250.5,3/24/2026,1500
+KA03KW7059,Alok kumar yadav,Lock,Bengaluru,0.5,3/23/2026,1250
+DL4SDY3566,Thakurdeen pal ,Lock,Delhi,0.5,3/25/2026,1250
+DL4GD9280,Deepak Kumar,Lock,Delhi,0.5,3/23/2026,1250
+DL4SEB2389,Prabal kumar pal ,Active,Delhi,1500,3/26/2026,1500
+DL4SEA6057,Prashant pal ,Active,Delhi,1500,3/26/2026,1500
+DLOD3458,Dharmendra ,Lock,Delhi,0.5,3/24/2026,1250
+DL4SEB2393,Santosh ,Active,Delhi,1500,3/27/2026,1500
+DL4SEB2360,Asim banik,Lock,Delhi,250.5,3/23/2026,1500
+DL4SEB2376,Prakash oraon,Lock,Delhi,250.5,3/24/2026,1500
+DLOD3186,Mohammad arbaaj ,Lock,Delhi,0.5,3/25/2026,1250
+KA50EN3610,Rafeek,Active,Bengaluru,1250,3/27/2026,1250
+DL4GD9218,Ashok Kumar ,Lock,Delhi,0.5,3/25/2026,1250
+DL4SDY3484,Dharm das,Active,Delhi,1250,3/26/2026,1250
+KA03KW7041,Vijay,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3480,Sugumar,Active,Bengaluru,1250,3/26/2026,1250
+DL4GD9196,Raja kumar sha,Active,Delhi,1250,3/29/2026,1250
+KA50EN3749,Raushan kumar,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3686,Niranjan kumar,Active,Bengaluru,1250,3/26/2026,1250
+DL4SEA6222,Manish kumar,Active,Delhi,1500,3/26/2026,1500
+DL4SEA6157,Sonu,Lock,Delhi,250.5,3/25/2026,1500
+DL4GD9169,Abdul goni,Lock,Bengaluru,0.5,3/23/2026,1250
+KA03KW6716,Rajbhor yadav,Active,Bengaluru,1250,3/26/2026,1250
+KA50EN3532,SHIVAM ADIVASI,Active,Bengaluru,1250,3/27/2026,1250
+KA03KW7106,MANJUNATHA,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4SDY3462,Krishna Kumar Yadav ,Active,Delhi,1250,3/27/2026,1250
+KA03KW6818,DEBASIS PATRA,Lock,Bengaluru,0.5,3/24/2026,1250
+KA03KW6363,Hritik giri,Lock,Bengaluru,0.5,3/25/2026,1250
+KA50EN3545,Gulnavaz,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4GD8946,CHANDRA PAL,Active,Delhi,1250,3/26/2026,1250
+KA04KS4190,Badal kumar,Active,Bengaluru,1250,3/26/2026,1250
+KA03KW7072,mallesh wale,Active,Bengaluru,1250,3/26/2026,1250
+KA04KS4297,Ravi Dm,Active,Bengaluru,1250,3/26/2026,1250
+KA03KW6947,Jay singh,Active,Delhi,1250,3/27/2026,1250
+DL4SDY3270,Akhilesh Kumar ,Lock,Delhi,0.5,3/23/2026,1250
+DL4SDY2619,Pawandev kumar,Lock,Delhi,0.5,3/24/2026,1250
+DL4SEA6094,Manish kumar,Lock,Delhi,250.5,3/25/2026,1500
+DL4SEA6184,aasadul shahaji,Lock,Delhi,250.5,3/24/2026,1500
+DL4GD9112,Manoj kumar tiwari,Lock,Delhi,0.5,3/25/2026,1250
+KA03KW7017,Vikash Kumar ,Active,Delhi,1250,3/26/2026,1250
+DL4SEA6096,Jaydab purkait,Active,Delhi,1500,3/26/2026,1500
+KA03KW7063,Naresh bairwa ,Active,Delhi,1250,3/26/2026,1250
+DL4SEA6083,Md yasin raja ,Active,Delhi,1500,3/27/2026,1500
+KA50EN3515,Mridul Das,Active,Bengaluru,1250,3/27/2026,1250
+DL4SEB2371,Raja bhaiya ,Lock,Delhi,250.5,3/24/2026,1500
+KA01KT0113,Atiullah khan,Active,Bengaluru,1600,3/26/2026,1600
+KA01KT0122,Leivon thangrengngam kom,Lock,Bengaluru,350.5,3/23/2026,1600
+DL4GD9199,Suresh Kumar pal ,Active,Delhi,1250,3/28/2026,1250
+KA03KW7081,MD Mubarak ,Lock,Delhi,0.5,3/23/2026,1250
+KA01KT0143,Abhisekh M,Active,Bengaluru,1600,3/26/2026,1600
+DL4GD9165,Sahil yadav,Active,Delhi,1250,3/27/2026,1250
+KA03KW6853,Munendra,Lock,Delhi,0.5,3/25/2026,1250
+KA01KT0117,Jitendra kumar,Active,Bengaluru,1600,3/26/2026,1600
+KA01KT0146,Shaheed shaikh,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT0129,Narayan pradhan,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT0163,Rujusa daimari,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT0118,Ramkrishna gautam,Active,Bengaluru,1600,3/27/2026,1600
+KA04KS4283,Rajababu kumar,Active,Delhi,1250,3/27/2026,1250
+DL4SDY3707,Rahul ,Active,Delhi,1250,3/27/2026,1250
+DL4GD8972,Bhola kumar,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY2767,Nitai dhar,Lock,Delhi,0.5,3/25/2026,1250
+KA01KT0128,Waseem shik,Lock,Bengaluru,350.5,3/24/2026,1600
+DL4SEA6104,Chote Lal pal,Active,Delhi,1500,3/27/2026,1500
+DL4SEA6095,Ankur maan,Lock,Delhi,250.5,3/25/2026,1500
+DL4SDY3686,Aman Saroj,Lock,Delhi,0.5,3/25/2026,1250
+DL4SDY3622,Pramod Kumar,Active,Delhi,1250,3/27/2026,1250
+DL4SEA6204,Amit pal,Active,Delhi,1500,3/26/2026,1500
+DL4SEA6040,Vinod Kumar ,Lock,Delhi,250.5,3/24/2026,1500
+DL4SDY2686,Deva ram ,Lock,Delhi,0.5,3/24/2026,1250
+KA01KT1213,Sandeep reddy,Lock,Bengaluru,350.5,3/25/2026,1600
+DL4SDY2997,Pawan Kumar,Active,Delhi,1250,3/26/2026,1250
+KA01KT0138,Ramesh P,Lock,Bengaluru,350.5,3/24/2026,1600
+DL4SEA6218,Jagdeesh ahirwar ,Lock,Delhi,250.5,3/23/2026,1500
+DL4SDY2628,Fazeel ahmad,Active,Delhi,1250,3/26/2026,1250
+DL4SEA6263,Mohit pal,Active,Delhi,1500,3/26/2026,1500
+DL4SDY2969,Pintu kumar,Active,Delhi,1250,3/27/2026,1250
+KA04KS4180,Kundan Kumar ,Active,Delhi,1250,3/27/2026,1250
+KA01KT0162,Vipin singh ,Lock,Bengaluru,350.5,3/25/2026,1600
+KA01KT1171,Kartik Barik,Lock,Bengaluru,850.5,3/25/2026,2100
+KA01KT0141,Nirakar Barik,Active,Bengaluru,1600,3/26/2026,1600
+DL4SEA6266,Bharat raj saini ,Lock,Delhi,250.5,3/23/2026,1500
+DL4SDY3632,Umlesh ray ,Active,Delhi,1250,3/27/2026,1250
+KA01KT1285,Harris s,Lock,Bengaluru,350.5,3/24/2026,1600
+KA01KT1292,Anandhakrishnan s,Lock,Bengaluru,350.5,3/24/2026,1600
+KA01KT1321,Silambarasan M,Lock,Bengaluru,350.5,3/23/2026,1600
+KA01KT1201,Chandan Kumar,Active,Bengaluru,1600,3/26/2026,1600
+KA01KT1178,Vicky das,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT0133,Sahil Ahmed,Lock,Bengaluru,350.5,3/23/2026,1600
+KA01KT1191,chalapathi,Active,Bengaluru,1600,3/26/2026,1600
+KA01KT1192,Prutviraj Dindur,Active,Bengaluru,1600,3/26/2026,1600
+KA01KT1206,khabendra Tripura,Lock,Bengaluru,350.5,3/23/2026,1600
+KA01KT1288,Manoj Nath,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT1290,Dhiraj kumar,Active,Bengaluru,1600,3/26/2026,1600
+KA01KT1289,Amar pradhan ,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT1174,Ramanath Reddy,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT0121,Muralidharan,Lock,Bengaluru,350.5,3/23/2026,1600
+KA01KT1200,Babulu mahalik,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT1169,Brundaban muduli,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT1181,MD amanullah,Lock,Bengaluru,350.5,3/24/2026,1600
+DL4SDY2719,Shiv kumar,Lock,Delhi,0.5,3/25/2026,1250
+DL4GD9299,Prem chandra kushwaha,Active,Delhi,1250,3/26/2026,1250
+KA01KT0125,Stayam singh ,Lock,Bengaluru,350.5,3/25/2026,1600
+KA01KT0142,Pravin yadav ,Lock,Bengaluru,350.5,3/25/2026,1600
+DL4SEA6155,Benkatesh kumar,Active,Delhi,1500,3/27/2026,1500
+KA50EN3793,Rohit kumar ,Active,Delhi,0.5,3/25/2026,1250
+KA50EN3674,Akash Kumar ,Lock,Delhi,0.5,3/23/2026,1250
+DL4SDY2667,Kuldeep singh ,Active,Delhi,0.5,3/24/2026,1250
+KA03KW6774,Ramesh,Active,Delhi,0.5,3/24/2026,1250
+DLOD3273,Amit ahirwar ,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY2627,Abhishek ahirwar ,Lock,Delhi,0.5,3/23/2026,1250
+KA03KW7032,Satish giri ,Active,Delhi,1250,3/27/2026,1250
+DL4SDY2670,Shivam ,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY3633,Arun kumar ,Lock,Delhi,0.5,3/23/2026,1250
+DL4SDY3558,Rahul saxena ,Lock,Delhi,0.5,3/23/2026,1250
+DL4SDY2798,Devendra singh ,Lock,Delhi,0.5,3/24/2026,1250
+KA50EN3730,Veerpal singh,Lock,Delhi,0.5,3/24/2026,1250
+KA03KW7023,Abhishek ,Active,Delhi,0.5,3/23/2026,1250
+DL4SDY2913,Ram Lakhan mondal,Active,Delhi,0.5,3/23/2026,1250
+KA01KT1302,Shayon Das,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT1189,Samar Chandra barik,Active,Bengaluru,1600,3/27/2026,1600
+KA03KW7061,Pushpendra pal,Lock,Delhi,0.5,3/23/2026,1250
+DL4SDY2759,Sohit tomar ,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY2611,Sonveer singh ,Lock,Delhi,500.5,3/25/2026,1750
+DL4SDY3614,kulwant singh,Lock,Delhi,0.5,3/24/2026,1250
+KA01KT1217,KOUSHIK ROY,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT1214,JANIP Roy,Active,Bengaluru,1600,3/28/2026,1600
+DLXE0862,Shekhar,Active,Delhi,0.5,3/23/2026,1250
+KA03KW7096,BRIJESH KUMAR,Lock,Delhi,0.5,3/23/2026,1250
+KA01KT1186,Jagannatha nayak,Lock,Bengaluru,350.5,3/23/2026,1600
+DL4SDY3668,NITYA PRAKASH,Lock,Delhi,0.5,3/23/2026,1250
+KA03KW7095,Anjanee singh  Patel,Lock,Bengaluru,0.5,3/23/2026,1250
+DL4SEA6106,Sachin kumar,Lock,Delhi,250.5,3/23/2026,1500
+KA01KT1172,SUNIL RATHOD,Lock,Bengaluru,350.5,3/25/2026,1600
+DL4SDY2960,HARSIT MISHRA,Lock,Delhi,0.5,3/24/2026,1250
+KA01KT1209,Vinodh K R,Lock,Bengaluru,350.5,3/23/2026,1600
+DL4GD9250,AKASH KUMAR,Lock,Delhi,0.5,3/24/2026,1250
+KA50EN3830,Ajay Kumar ,Lock,Delhi,0.5,3/24/2026,1250
+KA01KT1193,Apurba klita,Active,Bengaluru,1600,3/27/2026,1600
+DL4SDY3479,ABHISHEK CHUTURVEDI,Lock,Delhi,0.5,3/24/2026,1250
+DL4SEA6187,Sachin shakya ,Active,Delhi,1500,3/27/2026,1500
+KA01KT0157,Amit kumar das,Lock,Bengaluru,350.5,3/23/2026,1600
+KA50EN3779,Santram yadav,Lock,Delhi,0.5,3/24/2026,1250
+DL4SEA6093,Suraj Kumar,Lock,Delhi,250.5,3/25/2026,1500
+KA01KT1196,Boya Raghava Naidu,Lock,Bengaluru,350.5,3/25/2026,1600
+KA01KT1179,Jagan Bhuyan,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT1291,Akash ,Lock,Bengaluru,350.5,3/23/2026,1600
+DL4SDY3422,Md imran shah,Lock,Delhi,0.5,3/24/2026,1250
+KA03KW6882,Sumit Mallick,Lock,Bengaluru,0.5,3/24/2026,1250
+DL4GD9089,Sachin ahirwar,Lock,Delhi,0.5,3/25/2026,1250
+KA01KT1303,Nagaraju,Active,Bengaluru,1600,3/27/2026,1600
+KA04KS4193,Tillu kumar ,Active,Delhi,1250,3/26/2026,1250
+DL4SEA6241,Vikas kumar savita ,Active,Delhi,1500,3/27/2026,1500
+DL4SEA6270,Sagar ,Active,Delhi,1500,3/27/2026,1500
+DL4SEA6253,Ramashankar ,Lock,Delhi,250.5,3/24/2026,1500
+DL4SDY2762,VISHAL VHANSAKAR,Active,Delhi,1250,3/26/2026,1250
+DL4SEB2350,Himanshu,Active,Delhi,1500,3/27/2026,1500
+DL4GD9035,Rajesh kumar,Active,Delhi,1250,3/26/2026,1250
+KA03KW6834,Sandeep kumar,Active,Delhi,1250,3/26/2026,1250
+KA01KT1316,Ashiq,Lock,Bengaluru,350.5,3/24/2026,1600
+DL4SEA6055,Bablu pal,Active,Delhi,1500,3/26/2026,1500
+KA03KW7100,Harvir singh ,Active,Delhi,1250,3/27/2026,1250
+DL4SDY3466,Ramvir naresh singh,Active,Delhi,1250,3/27/2026,1250
+DL4SDY2694,Anuj pal ,Active,Delhi,1250,3/27/2026,1250
+DL4GD9260,Shivam ,Active,Delhi,1250,3/27/2026,1250
+KA03KW7073,Sumit kumar,Active,Delhi,1250,3/27/2026,1250
+DL4SDY2688,ankit singh,Active,Delhi,1250,3/27/2026,1250
+KA50EN3741,Amit Kumar ,Lock,Delhi,0.5,3/24/2026,1250
+KA04KS4302,Sachin tendulkar,Active,Delhi,1250,3/27/2026,1250
+DL4SDY3643,lokbandhu kumar,Active,Delhi,1250,3/27/2026,1250
+DL4SEA6072,Ankit ,Active,Delhi,1500,3/27/2026,1500
+KA50EN3580,ANISH KUMAR,Active,Bengaluru,1250,3/27/2026,1250
+DL4SEA6070,Prashant faujdar,Lock,Delhi,250.5,3/23/2026,1500
+DL4SEA6092,Kumar Abhishek ,Lock,Delhi,250.5,3/23/2026,1500
+KA01KT1218,Pulipatti Ravi,Active,Bengaluru,1600,3/26/2026,1600
+KA01KT1208,Mithlesh Kumar,Active,Bengaluru,1600,3/26/2026,1600
+KA51JN6539,Spondon Sankar Das,Active,Bengaluru,1650,3/26/2026,1650
+DL4GD9284,ARYAN ,Lock,Delhi,0.5,3/24/2026,1250
+KA03KW6747,Shivam Yadav ,Active,Delhi,1250,3/29/2026,1250
+DL4GD9398,Krishan ,Lock,Delhi,0.5,3/23/2026,1250
+KA51JN7749,Munna Kumar,Active,Bengaluru,1600,3/27/2026,1600
+QBLR20014,Ramesh Belligundi,Active,Bengaluru,1600,3/27/2026,1600
+KA51JN6600,Siddhant Kumar Sharma,Active,Bengaluru,1650,3/27/2026,1650
+KA01KT0120,Sanur ahmed,Active,Bengaluru,1600,3/27/2026,1600
+KA51JN7655,AMAR BEHERA,Active,Bengaluru,1600,3/27/2026,1600
+KA50EN3639,amit kr ram,Active,Delhi,1250,3/27/2026,1250
+KA04KS4196,BAIDANAND KR YADAV,Lock,Delhi,0.5,3/25/2026,1250
+DLOD3303,ROHITASH,Lock,Delhi,0.5,3/23/2026,1250
+KA51JN6599,Barun kumar Verma,Active,Bengaluru,1650,3/27/2026,1650
+DL4SEA6237,Shiva,Lock,Delhi,250.5,3/25/2026,1500
+KA01KT1296,Gouranga Samanta,Active,Bengaluru,1600,3/28/2026,1600
+KA50EN3817,Sohan pal ,Lock,Delhi,0.5,3/24/2026,1250
+DL4GD9314,Rahul kumar mandal,Lock,Delhi,0.5,3/23/2026,1250
+KA01KT1314,Kanne Chinni Krishna,Active,Bengaluru,1600,3/28/2026,1600
+KA01KT1177,DILLIP KUMAR GOUDA,Active,Bengaluru,1600,3/28/2026,1600
+DL4SDY2799,GOLU KUMAR,Lock,Delhi,0.5,3/24/2026,1250
+KA03KW6795,SANJIB SARKAR,Lock,Delhi,0.5,3/24/2026,1250
+DL4SDY2730,RAJNESSH,Lock,Delhi,0.5,3/24/2026,1250
+DL4GD9540,Ajay kori,Pending,Delhi,0.5,3/24/2026,1250
+DL4SDY2625,MINARUL SHAIKH,Pending,Delhi,1250,3/28/2026,1250
+DL4SDY2635,MONU,Lock,Delhi,0.5,3/24/2026,1250
+KA01KT1297,Ravi Ravi,Active,Bengaluru,1600,3/28/2026,1600
+DL4SDY3793,Kapil sharma,Lock,Delhi,0.5,3/24/2026,1250
+DL4GD9369,Sanjay ,Lock,Delhi,0.5,3/24/2026,1250
+DL4GD9128,Dipak sahani ,Pending,Delhi,0.5,3/25/2026,1250
+KA51JN6525,Tarikul Islam,Active,Bengaluru,1650,3/29/2026,1650
+KA51JN6558,Lourdu Swamy,Active,Bengaluru,1650,3/29/2026,1650
+KA01KT1305,Monaihareang,Active,Bengaluru,1600,3/29/2026,1600
+KA51JN6531,Sanjeeo Kumar,Active,Bengaluru,1250,3/29/2026,1250
+KA01KT1322,Krishna Kumar,Active,Bengaluru,1600,3/29/2026,1600
+KA01KT1219,Gondipalle harikrishna,Active,Bengaluru,0.5,3/24/2026,1250
+KA01KT1203,Manjeet Yadav,Active,Bengaluru,1600,3/29/2026,1600
+KA01KT0147,Pravesh Kumar Yadav,Active,Bengaluru,1600,3/29/2026,1600
+KA03KW6755,Hemant sharma,Active,Delhi,1250,3/26/2026,1250
+DL4SEA6030,Sooraj pal,Lock,Delhi,250.5,3/25/2026,1500
+KA01KT1318,Jeril Joseph,Active,Bengaluru,1600,3/29/2026,1600
+DL4SEA6025,Sandeep Kumar ,Active,Delhi,1500,3/27/2026,1500
+DL4SDY2968,sandeep kumar,Active,Delhi,1250,3/26/2026,1250
+KA03KW6760,Aman raj ,Active,Delhi,1250,3/26/2026,1250
+DL4SEA6124,Kapil kansal ,Active,Delhi,1500,3/29/2026,1500
+DL4SDY2749,Harsh,Lock,Delhi,0.5,3/25/2026,1250
+DL4SDY2634,Ayush singh ,Active,Delhi,1250,3/28/2026,1250
+DL4GD9546,Abhishek Yadav ,Active,Delhi,1250,3/27/2026,1250
+KA50EN3677,pahalabehera pahala,Lock,Bengaluru,0.5,3/25/2026,1250
+KA04KS4298,Kuldeep,Active,Delhi,1250,3/26/2026,1250
+DL4SDY2757,Sunil rajput ,Active,Delhi,1250,3/28/2026,1250
+KA50EN3645,Khagedar Kumar,Lock,Bengaluru,0.5,3/25/2026,1250
+KA50EN3797,Aditya mishra,Active,Delhi,1250,3/26/2026,1250
+DL4GD9238,Lakshmi pal,Active,Delhi,1250,3/27/2026,1250
+DL4SDY2632,Arbendra kumar pal,Active,Delhi,1250,3/27/2026,1250
+DL4SDY3665,NITIN,Active,Delhi,1250,3/27/2026,1250
+DL4SEA6255,Rajkumar pal,Active,Delhi,1500,3/27/2026,1500
+DL4SDY2713,NITIN KR,Active,Delhi,1250,3/29/2026,1250
+DL4GD9572,MD SALAUDDIN,Active,Delhi,1250,3/26/2026,1250
+DL4SDY3618,ANIL YADAV,Active,Delhi,1250,3/26/2026,1250
+DLOD3184,DIWAKAR,Active,Delhi,1500,3/26/2026,1500
+DL4SDY2975,Chhote lal,Active,Delhi,1250,3/28/2026,1250
+KA51JN6542,Kailash G,Active,Bengaluru,1650,3/27/2026,1650
+KA51JN6572,Goverdhan Reddy,Active,Bengaluru,1650,3/27/2026,1650
+KA51JN6580,K kishore Kumar,Active,Bengaluru,1650,3/27/2026,1650
+KA51JN6529,Mitan Das,Active,Bengaluru,1650,3/27/2026,1650
+KA01KT5488,Vankarakunta Surya Narayana,Active,Bengaluru,1600,3/27/2026,1600
+DL4SEB2313,Om Prakash pal,Active,Delhi,1500,3/28/2026,1500
+KA01KT5487,Roni Das,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT5483,Harsha Vardhan,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT5485,Mahesh Mahi,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT5484,Mohammad Parvez,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT5482,Abhishek Singh,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT5486,Shivu Kumar,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT5489,Kanakadiripalle Chakali Harikrishna,Active,Bengaluru,1600,3/27/2026,1600
+KA51JN6522,Umar Ali,Active,Bengaluru,1650,3/27/2026,1650
+KA01KT5481,Bikrom Das,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT1315,Aditya Barsiliya,Active,Bengaluru,1600,3/27/2026,1600
+KA01KT0130,Sourav sau,Active,Bengaluru,1600,3/27/2026,1600
+KA51JN6575,Dharmapada Jena,Active,Bengaluru,1650,3/27/2026,1650
+KA51JN6591,Jay prakash yadav ,Active,Bengaluru,1650,3/28/2026,1650
+KA51JN6545,Ajit Kumar,Active,Bengaluru,1650,3/28/2026,1650
+KA51JN6578,Jayakumar ,Active,Bengaluru,1650,3/28/2026,1650
+KA01KT0159,Muhammad irfan,Active,Bengaluru,1600,3/28/2026,1600
+DLOD3205,Vinit,Active,Delhi,1500,3/29/2026,1500
+KA51JN6582,Alamin Mallick,Active,Bengaluru,1650,3/29/2026,1650
+KA03KW6813,vijay kr mukhiya,Active,Delhi,1250,3/29/2026,1250
+KA51JN7731,Vinit Sulikeri,Active,Bengaluru,1650,3/29/2026,1650
+KA51JN6561,Sourav Roy,Active,Bengaluru,1650,3/29/2026,1650

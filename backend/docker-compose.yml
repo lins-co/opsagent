@@ -1,0 +1,49 @@
+services:
+  backend:
+    image: ghcr.io/emo-codes/ops-agent-backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: emo-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # WhatsApp session — MUST persist across deploys
+      - wa-session:/app/.wwebjs_auth
+      - wa-cache:/app/.wwebjs_cache
+      # CSV exports
+      - exports:/app/src/uploads/exports
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # Auto-deploy: watches GHCR for new images, pulls and restarts
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=60
+      - WATCHTOWER_LABEL_ENABLE=false
+      - WATCHTOWER_INCLUDE_STOPPED=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # GHCR auth — created by: docker login ghcr.io
+      - ~/.docker/config.json:/config.json:ro
+
+volumes:
+  wa-session:
+  wa-cache:
+  exports:

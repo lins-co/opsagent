@@ -1,0 +1,10 @@
+node_modules
+dist
+.wwebjs_auth
+.wwebjs_cache
+*.env
+.env.*
+.git
+.gitignore
+*.md
+scripts/
