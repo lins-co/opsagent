@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import { api } from '@/lib/api'
-import { useAuthStore } from '@/stores/auth.store'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
 import {
-  User,
   Phone,
   Mail,
   Shield,
@@ -16,6 +16,7 @@ import {
   Check,
   Loader2,
   Unlink,
+  Sparkles,
 } from 'lucide-react'
 
 interface UserProfile {
@@ -29,6 +30,24 @@ interface UserProfile {
   allowedLocations: string[]
 }
 
+interface BotPrefs {
+  enabled: boolean
+  tone: 'formal' | 'casual' | 'balanced' | 'concise'
+  responseLength: 'short' | 'medium' | 'detailed'
+  language: 'en' | 'hi' | 'hinglish'
+  emojiUsage: 'none' | 'minimal' | 'expressive'
+  customInstructions: string | null
+}
+
+const DEFAULT_PREFS: BotPrefs = {
+  enabled: true,
+  tone: 'balanced',
+  responseLength: 'medium',
+  language: 'en',
+  emojiUsage: 'minimal',
+  customInstructions: '',
+}
+
 export default function ProfileSettings() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -37,7 +56,12 @@ export default function ProfileSettings() {
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
 
-  useEffect(() => { loadProfile() }, [])
+  // Bot preferences state
+  const [prefs, setPrefs] = useState<BotPrefs>(DEFAULT_PREFS)
+  const [prefsSaving, setPrefsSaving] = useState(false)
+  const [prefsMsg, setPrefsMsg] = useState('')
+
+  useEffect(() => { loadProfile(); loadPrefs() }, [])
 
   const loadProfile = async () => {
     try {
@@ -46,6 +70,27 @@ export default function ProfileSettings() {
       setPhoneInput(data.phone || '')
     } catch {}
     setLoading(false)
+  }
+
+  const loadPrefs = async () => {
+    try {
+      const data = await api.get<BotPrefs>('/me/bot-preferences')
+      setPrefs({ ...DEFAULT_PREFS, ...data, customInstructions: data.customInstructions ?? '' })
+    } catch {}
+  }
+
+  const savePrefs = async () => {
+    setPrefsSaving(true)
+    setPrefsMsg('')
+    try {
+      const payload = { ...prefs, customInstructions: prefs.customInstructions?.trim() || null }
+      await api.put('/me/bot-preferences', payload)
+      setPrefsMsg('Saved')
+      setTimeout(() => setPrefsMsg(''), 2000)
+    } catch (err: any) {
+      setPrefsMsg(err.message || 'Failed to save')
+    }
+    setPrefsSaving(false)
   }
 
   const handleLinkPhone = async () => {
@@ -174,6 +219,94 @@ export default function ProfileSettings() {
           </CardContent>
         </Card>
 
+        {/* WhatsApp Bot Personality */}
+        <Card className="bg-card border-border mb-4">
+          <CardContent className="pt-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <Sparkles size={20} className="text-purple-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold">Bot Reply Style (WhatsApp DM)</h3>
+                <p className="text-[12px] text-muted-foreground">Configure how the EMO bot responds to you in personal chat</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-muted-foreground">{prefs.enabled ? 'On' : 'Off'}</span>
+                <Switch
+                  checked={prefs.enabled}
+                  onCheckedChange={(v: boolean) => setPrefs({ ...prefs, enabled: v })}
+                />
+              </div>
+            </div>
+
+            <div className={prefs.enabled ? '' : 'opacity-50 pointer-events-none'}>
+              <div className="grid grid-cols-2 gap-3">
+                <PrefSelect
+                  label="Tone"
+                  value={prefs.tone}
+                  onChange={(v) => setPrefs({ ...prefs, tone: v as BotPrefs['tone'] })}
+                  options={[
+                    { value: 'balanced', label: 'Balanced' },
+                    { value: 'formal', label: 'Formal' },
+                    { value: 'casual', label: 'Casual' },
+                    { value: 'concise', label: 'Concise' },
+                  ]}
+                />
+                <PrefSelect
+                  label="Length"
+                  value={prefs.responseLength}
+                  onChange={(v) => setPrefs({ ...prefs, responseLength: v as BotPrefs['responseLength'] })}
+                  options={[
+                    { value: 'short', label: 'Short' },
+                    { value: 'medium', label: 'Medium' },
+                    { value: 'detailed', label: 'Detailed' },
+                  ]}
+                />
+                <PrefSelect
+                  label="Language"
+                  value={prefs.language}
+                  onChange={(v) => setPrefs({ ...prefs, language: v as BotPrefs['language'] })}
+                  options={[
+                    { value: 'en', label: 'English' },
+                    { value: 'hi', label: 'हिन्दी' },
+                    { value: 'hinglish', label: 'Hinglish' },
+                  ]}
+                />
+                <PrefSelect
+                  label="Emoji"
+                  value={prefs.emojiUsage}
+                  onChange={(v) => setPrefs({ ...prefs, emojiUsage: v as BotPrefs['emojiUsage'] })}
+                  options={[
+                    { value: 'none', label: 'None' },
+                    { value: 'minimal', label: 'Minimal' },
+                    { value: 'expressive', label: 'Expressive' },
+                  ]}
+                />
+              </div>
+
+              <div className="mt-4 space-y-1.5">
+                <label className="text-[12px] font-medium text-muted-foreground">Custom instructions (optional)</label>
+                <Textarea
+                  value={prefs.customInstructions || ''}
+                  onChange={(e) => setPrefs({ ...prefs, customInstructions: e.target.value.slice(0, 1000) })}
+                  placeholder="e.g. Always start with the headline number. Skip greetings. Address me as 'Boss'."
+                  rows={3}
+                  className="text-[13px]"
+                />
+                <p className="text-[11px] text-muted-foreground">{(prefs.customInstructions || '').length}/1000 — style only; cannot override data scope or security rules.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              {prefsMsg && <span className="text-[12px] text-emerald-400">{prefsMsg}</span>}
+              <Button onClick={savePrefs} disabled={prefsSaving} size="sm" className="gap-1.5">
+                {prefsSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                Save preferences
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Admin: System Settings Link */}
         {profile.role === 'admin' && (
           <Card className="bg-card border-border mb-4">
@@ -210,6 +343,33 @@ export default function ProfileSettings() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  )
+}
+
+function PrefSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: { value: string; label: string }[]
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[12px] font-medium text-muted-foreground">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-9 rounded-md border border-border bg-background px-2 text-[13px]"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
     </div>
   )
 }

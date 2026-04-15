@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils'
 import MarkdownMessage from '@/components/chat/MarkdownMessage'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
 import {
   Send,
   Plus,
@@ -20,7 +19,6 @@ import {
   Battery,
   AlertTriangle,
   Wrench,
-  FileText,
 } from 'lucide-react'
 
 const QUICK_ACTIONS = [
@@ -36,6 +34,7 @@ const AGENT_BADGES: Record<string, { label: string; color: string }> = {
   complaint: { label: 'Complaint Agent', color: 'bg-amber-500/15 text-amber-500 dark:text-amber-400 border-amber-500/20' },
   service: { label: 'Service Agent', color: 'bg-purple-500/15 text-purple-500 dark:text-purple-400 border-purple-500/20' },
   report: { label: 'Report Agent', color: 'bg-pink-500/15 text-pink-500 dark:text-pink-400 border-pink-500/20' },
+  finance: { label: 'Finance Agent', color: 'bg-teal-500/15 text-teal-500 dark:text-teal-400 border-teal-500/20' },
   general: { label: 'General Agent', color: 'bg-zinc-500/15 text-zinc-500 dark:text-zinc-400 border-zinc-500/20' },
 }
 

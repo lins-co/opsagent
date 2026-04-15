@@ -11,6 +11,7 @@ import { extractEntities } from "./extract.js";
 import { saveMessageMedia, linkMediaToMessage } from "./media.js";
 import { isEnabled } from "../../config/settings.js";
 import { checkProactiveResponse } from "./proactive.js";
+import { buildBotPrefsPrompt } from "../../lib/bot-prefs.js";
 
 export const waEvents = new EventEmitter();
 
@@ -593,11 +594,16 @@ async function handleDMBot(msg: any) {
     const startTime = Date.now();
     const invokeAgent = await getInvokeAgent();
 
+    // Per-user style/persona preferences (configurable from web settings)
+    const prefs = await prisma.userBotPreferences.findUnique({ where: { userId: user.id } });
+    const botPrefsPrompt = buildBotPrefsPrompt(prefs);
+
     const result = await invokeAgent(body, {
       userId: user.id,
       userRole: user.role.name,
       orgScope,
       conversationHistory: history.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
+      botPrefsPrompt,
     });
 
     const latencyMs = Date.now() - startTime;

@@ -22,8 +22,23 @@ Today: ${today}
 Use tools for every data question. Never guess.
 
 DATABASE TOOLS:
-- query_collection: Query vehicles (${stats.Vehicletracker || 0}), deployments (${stats.Deployementresponses || 0}), complaints (${stats.Newcomplaintresponses || 0}), battery_complaints (${stats.Complaindatabase || 0}), returns (${stats.Vehiclereturnresponses || 0}), rentals (${stats.Rentingdatabase || 0})
-- aggregate_data: Count, sum, avg from any collection. Supports operation="sum" with sumField for totals.
+- query_collection: Query any of these collections:
+  OPS: vehicles (${stats.Vehicletracker || 0}), deployments (${stats.Deployementresponses || 0}), complaints (${stats.Newcomplaintresponses || 0}), battery_complaints (${stats.Complaindatabase || 0}), returns (${stats.Vehiclereturnresponses || 0}), rentals (${stats.Rentingdatabase || 0}), rental_history (${stats.HistoricalRentingdatabase || 0})
+  FINANCE: payments (${stats.Gencash || 0} — Gencash txns), invoices (${stats.zohobilling || 0} — Zoho), payment_links (${stats.manuallinkgenerations || 0}), rent_links (${stats.chatbotrent2 || 0})
+  ASSETS: factory_batteries (${stats.Factorydatabase || 0} — pack lifecycle), battery_telemetry (${stats.BatteryInfo || 0} — live SOC/voltage), chargers (${stats.Charger || 0}), charger_tickets (${stats.Chargerresponse || 0}), kazam_charger_tickets (${stats.kazamdata || 0})
+- aggregate_data: Count, sum, avg, unique from any of the above. Supports groupBy and sumField.
+
+CHARGER QUERIES:
+- Status / location overview → chargers
+- EMO-logged charger issues with resolution notes → charger_tickets (field: "Issue by kazam" has Kazam's diagnosis)
+- Kazam-side ticket history → kazam_charger_tickets
+
+BATTERY QUERIES:
+- Field complaints (from riders/ops) → battery_complaints
+- Factory lifecycle (ZEAA*/ZEN-E* packs, dispatch, repair/replace counts) → factory_batteries (fields: "Battery ID", "Status", "Frequency of Complaints", "Repair Count", "Replace Count")
+- Live telemetry (SOC, voltage, BMS mode) → battery_telemetry (fields: batteryId, bmsId, soc, voltage, mode, status)
+
+FOR PAYMENTS/INVOICES/COLLECTIONS/BALANCES: prefer routing to the finance agent, but if a user asks here, use collection="payments" (Gencash) for transactions and "invoices" (zohobilling) for Zoho invoices.
 
 RENTAL DATA (${stats.Rentingdatabase || 0} records):
 Numeric fields: "Rent Amount" (weekly rent, number), "Balance Amount" (outstanding, number), "Deposit Amount" (number), "Perday_Collection_Amount" (daily rate), "Payment Weeks Paid" (number)
@@ -96,8 +111,9 @@ DATA:
 export async function generalAgentNode(state: AgentStateType) {
   const msgs = state.messages;
 
+  const prefsPrefix = state.botPrefsPrompt || "";
   let currentMessages: any[] = [
-    new SystemMessage(buildSystemPrompt()),
+    new SystemMessage(prefsPrefix + buildSystemPrompt()),
     ...msgs.slice(-6),
   ];
 

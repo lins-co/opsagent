@@ -104,8 +104,9 @@ export async function reportAgentNode(state: AgentStateType) {
     }
   } catch { /* WhatsApp not connected, skip */ }
 
+  const prefsPrefix = state.botPrefsPrompt || "";
   const response = await llm.invoke([
-    new SystemMessage(`You are EMO's Report Intelligence Agent. Generate operational reports.
+    new SystemMessage(prefsPrefix + `You are EMO's Report Intelligence Agent. Generate operational reports.
 Today: ${new Date().toISOString().split("T")[0]}
 ${context}
 

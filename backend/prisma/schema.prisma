@@ -249,9 +249,30 @@ model User {
   alertRules      AlertRule[]
   scheduledReports ScheduledReport[]
   csvUploads      CsvUpload[]
+  botPreferences  UserBotPreferences?
 
   @@index([orgNodeId])
   @@map("users")
+}
+
+// Per-user configuration for how the bot replies in WhatsApp personal chats.
+// Optional 1-1 with User. Free-text customInstructions are wrapped in a safety
+// sandwich at injection time to prevent jailbreaking core data/scope rules.
+model UserBotPreferences {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @unique @map("user_id") @db.Uuid
+  enabled            Boolean  @default(true)
+  tone               String   @default("balanced")        // formal | casual | balanced | concise
+  responseLength     String   @default("medium") @map("response_length") // short | medium | detailed
+  language           String   @default("en")              // en | hi | hinglish | ...
+  emojiUsage         String   @default("minimal") @map("emoji_usage")    // none | minimal | expressive
+  customInstructions String?  @map("custom_instructions") @db.VarChar(1000)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_bot_preferences")
 }
 
 model AuditLog {

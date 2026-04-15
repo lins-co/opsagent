@@ -8,6 +8,7 @@ import { batteryAgentNode } from "./nodes/battery-agent.js";
 import { complaintAgentNode } from "./nodes/complaint-agent.js";
 import { serviceAgentNode } from "./nodes/service-agent.js";
 import { reportAgentNode } from "./nodes/report-agent.js";
+import { financeAgentNode } from "./nodes/finance-agent.js";
 
 const AGENT_LABELS: Record<string, string> = {
   router: "Classifying your query...",
@@ -17,6 +18,7 @@ const AGENT_LABELS: Record<string, string> = {
   complaint: "Complaint Agent is reviewing complaint data...",
   service: "Service Agent is checking repair records...",
   report: "Report Agent is generating your report...",
+  finance: "Finance Agent is crunching payments and invoices...",
 };
 
 // Build the LangGraph
@@ -28,6 +30,7 @@ const graph = new StateGraph(AgentState)
   .addNode("complaint", complaintAgentNode)
   .addNode("service", serviceAgentNode)
   .addNode("report", reportAgentNode)
+  .addNode("finance", financeAgentNode)
   .addEdge("__start__", "router")
   .addConditionalEdges("router", routeDecision, {
     general: "general",
@@ -36,6 +39,7 @@ const graph = new StateGraph(AgentState)
     complaint: "complaint",
     service: "service",
     report: "report",
+    finance: "finance",
     csv: "general",
   })
   .addEdge("general", END)
@@ -43,7 +47,8 @@ const graph = new StateGraph(AgentState)
   .addEdge("battery", END)
   .addEdge("complaint", END)
   .addEdge("service", END)
-  .addEdge("report", END);
+  .addEdge("report", END)
+  .addEdge("finance", END);
 
 export const agentGraph = graph.compile();
 
@@ -58,6 +63,7 @@ export async function invokeAgent(
     orgScope: string[];
     conversationHistory?: { role: string; content: string }[];
     onStatus?: StatusCallback;
+    botPrefsPrompt?: string;
   }
 ): Promise<{ response: string; agent: string }> {
   const history = (options.conversationHistory || []).slice(-6);
@@ -75,6 +81,7 @@ export async function invokeAgent(
     userId: options.userId,
     userRole: options.userRole,
     orgScope: options.orgScope,
+    botPrefsPrompt: options.botPrefsPrompt || "",
   };
 
   let finalResponse = "";

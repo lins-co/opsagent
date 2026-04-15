@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useGoogleLogin } from '@react-oauth/google'
 import { useAuthStore } from '@/stores/auth.store'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -19,15 +18,6 @@ export default function Login() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const setAuth = useAuthStore((s) => s.setAuth)
   const navigate = useNavigate()
-
-  // Google login — use the credential flow
-  const googleLogin = useGoogleLogin({
-    flow: 'auth-code',
-    onSuccess: () => {
-      // This flow doesn't give us the id_token directly
-      // We'll use the implicit flow instead
-    },
-  })
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     setError('')
@@ -216,8 +206,6 @@ function GoogleButtonRenderer({
   onSuccess: (response: any) => void
   loading: boolean
 }) {
-  const [scriptLoaded, setScriptLoaded] = useState(false)
-  const buttonRef = useState<HTMLDivElement | null>(null)
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
   // If no client ID configured, show a disabled state
@@ -248,8 +236,6 @@ function GoogleCredentialButton({
   loading: boolean
   clientId: string
 }) {
-  const divRef = useState<HTMLDivElement | null>(null)
-
   // We'll use a custom styled button that triggers Google's popup
   const handleClick = () => {
     // @ts-ignore — google.accounts.id is loaded via the @react-oauth/google provider

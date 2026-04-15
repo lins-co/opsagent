@@ -46,8 +46,9 @@ STYLE:
 export async function fleetAgentNode(state: AgentStateType) {
   const msgs = state.messages;
 
+  const prefsPrefix = state.botPrefsPrompt || "";
   let currentMessages: any[] = [
-    new SystemMessage(buildSystemPrompt()),
+    new SystemMessage(prefsPrefix + buildSystemPrompt()),
     ...msgs.slice(-4),
   ];
 

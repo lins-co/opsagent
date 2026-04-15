@@ -31,6 +31,10 @@ export const AgentState = Annotation.Root({
     reducer: (_prev, next) => next,
     default: () => null,
   }),
+  botPrefsPrompt: Annotation<string>({
+    reducer: (_prev, next) => next,
+    default: () => "",
+  }),
 });
 
 export type AgentStateType = typeof AgentState.State;

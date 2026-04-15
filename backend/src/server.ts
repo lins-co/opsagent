@@ -5,13 +5,14 @@ import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { env } from "./config/env.js";
 import { prisma } from "./db/prisma.js";
-import { connectMongo, loadMongoData } from "./db/connectors/mongodb.js";
+import { connectMongo, loadMongoData, ensureIndexes } from "./db/connectors/mongodb.js";
 import authRouter from "./routes/auth.js";
 import chatRouter from "./routes/chat.js";
 import emailRouter from "./routes/email.js";
 import reportsRouter from "./routes/reports.js";
 import whatsappRouter from "./routes/whatsapp.js";
 import settingsRouter from "./routes/settings.js";
+import botPrefsRouter from "./routes/bot-prefs.js";
 import { startScheduler } from "./agents/intelligence/scheduler.js";
 import { startInsightsCron } from "./agents/intelligence/insights-cron.js";
 import { initWhatsApp } from "./channels/whatsapp/client.js";
@@ -56,6 +57,7 @@ app.use("/api/email", emailRouter);
 app.use("/api/reports", reportsRouter);
 app.use("/api/whatsapp", whatsappRouter);
 app.use("/api/settings", settingsRouter);
+app.use("/api/me/bot-preferences", botPrefsRouter);
 
 // ── WebSocket server for streaming chat ──
 const wss = new WebSocketServer({ server, path: "/ws/chat" });
@@ -121,12 +123,14 @@ async function main() {
 
     await seedDefaults();
 
-    // Load MongoDB data (existing collections)
+    // Load MongoDB — hot cache + indexes on direct collections
     try {
       await connectMongo();
+      await ensureIndexes();
       const data = await loadMongoData();
       const totalDocs = Object.values(data).reduce((sum, arr) => sum + arr.length, 0);
-      console.log(`Loaded ${totalDocs} documents from MongoDB (6 collections)`);
+      console.log(`Loaded ${totalDocs} docs from MongoDB hot cache (${Object.keys(data).length} collections)`);
+      console.log("Large collections (Gencash, zohobilling, Factorydatabase, HistoricalRenting) queried on-demand");
     } catch (err) {
       console.warn("MongoDB load failed (non-critical):", (err as Error).message);
     }

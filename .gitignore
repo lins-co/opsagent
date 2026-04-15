@@ -10,6 +10,7 @@ backend/.env
 backend/uploads/
 backend/.wwebjs_auth/
 backend/.wwebjs_cache/
+backend/storage/
 
 # Frontend
 frontend/node_modules/

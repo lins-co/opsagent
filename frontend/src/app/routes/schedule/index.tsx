@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import {
   CalendarClock,
   Plus,
@@ -19,7 +18,6 @@ import {
   Loader2,
   Check,
   X,
-  Pencil,
 } from 'lucide-react'
 
 interface Schedule {
@@ -86,7 +84,7 @@ export default function SchedulePage() {
   // Create form state
   const [name, setName] = useState('')
   const [prompt, setPrompt] = useState('')
-  const [cronValue, setCronValue] = useState('0 9 * * 1')
+  const [, setCronValue] = useState('0 9 * * 1')
   const [schedDay, setSchedDay] = useState('1')
   const [schedHour, setSchedHour] = useState(9)
   const [schedMinute, setSchedMinute] = useState(0)

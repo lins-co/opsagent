@@ -3,14 +3,13 @@ import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth.store'
 import {
-  MessageCircle,WifiOff,Users,User,Eye,EyeOff,Loader2,Search,
-  RefreshCw,Clock,MoreVertical,Paperclip,Smile,Send,Radio,ArrowDown
+  WifiOff,Users,User,Eye,EyeOff,Loader2,Search,
+  MoreVertical,Paperclip,Smile,Send,Radio,ArrowDown
 } from 'lucide-react'
 
 interface WAStatus { connected: boolean; number: string | null; qrPending: boolean; monitoredGroups: number }
 interface WAChat { id: string; name: string; isGroup: boolean; participantCount?: number; isMonitored: boolean }
 interface MonitoredGroup { id: string; chatId: string; chatName: string; isActive: boolean; messageCount: number; lastMessageAt: string | null }
-interface Participant { phone: string; name: string; isAdmin: boolean; isSuperAdmin: boolean }
 
 function formatTime(ts: number | string): string {
   const d = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts)
@@ -45,7 +44,6 @@ export default function WhatsAppPage() {
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [tab, setTab] = useState<'chats' | 'monitored'>('chats')
-  const [participants, setParticipants] = useState<Participant[]>([])
   const [showMenu, setShowMenu] = useState(false)
   
   // Sending logic
