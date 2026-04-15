@@ -13,6 +13,8 @@ import reportsRouter from "./routes/reports.js";
 import whatsappRouter from "./routes/whatsapp.js";
 import settingsRouter from "./routes/settings.js";
 import botPrefsRouter from "./routes/bot-prefs.js";
+import teamRouter from "./routes/team.js";
+import { startPmCron } from "./agents/program-manager/followup-cron.js";
 import { startScheduler } from "./agents/intelligence/scheduler.js";
 import { startInsightsCron } from "./agents/intelligence/insights-cron.js";
 import { initWhatsApp } from "./channels/whatsapp/client.js";
@@ -58,6 +60,7 @@ app.use("/api/reports", reportsRouter);
 app.use("/api/whatsapp", whatsappRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/me/bot-preferences", botPrefsRouter);
+app.use("/api/team", teamRouter);
 
 // ── WebSocket server for streaming chat ──
 const wss = new WebSocketServer({ server, path: "/ws/chat" });
@@ -140,6 +143,9 @@ async function main() {
 
     // Start insights extraction cron (WhatsApp pattern analysis)
     await startInsightsCron();
+
+    // Start program-manager follow-up cron (assigns + chases open insights)
+    await startPmCron();
 
     // Connect WhatsApp (server-level, shared across all users)
     // If already authenticated from a previous session, it reconnects automatically.

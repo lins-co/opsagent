@@ -146,6 +146,19 @@ async function captureGroupMessage(msg: any): Promise<void> {
         .catch(() => {});
     }
 
+    // ── 4a. PM resolution detector (async, don't block capture) ──
+    if (msgText) {
+      import("../../agents/program-manager/resolution.js").then(({ maybeResolveFromMessage }) =>
+        maybeResolveFromMessage({
+          groupChatId: msg.from,
+          senderName: sender,
+          body: msgText,
+          timestamp: new Date(msg.timestamp * 1000),
+          messageId: msgId,
+        }),
+      ).catch(() => {});
+    }
+
     // ── 4. Proactive response check (async, don't block capture) ──
     checkProactiveResponse({ body: msgText, chatId: msg.from, senderName: sender })
       .then(async (result) => {
@@ -554,6 +567,19 @@ async function handleDMBot(msg: any) {
   }
 
   console.log(`  [WA Bot] User: ${user.name} (${user.role.name})`);
+
+  // Program-manager commands short-circuit the agent pipeline.
+  try {
+    const { tryPmCommand } = await import("../../agents/program-manager/commands.js");
+    const pmReply = await tryPmCommand(user.id, body);
+    if (pmReply) {
+      await client!.sendMessage(chatId, pmReply);
+      console.log(`  [PM] Command handled for ${user.name}`);
+      return;
+    }
+  } catch (err: any) {
+    console.warn(`  [PM] command handler failed: ${err?.message}`);
+  }
 
   // Resolve org scope — same as web chat
   const orgScope = await resolveAllowedLocations(user.orgNodeId);

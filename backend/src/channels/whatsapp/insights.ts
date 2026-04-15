@@ -3,6 +3,7 @@ import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { prisma } from "../../db/prisma.js";
 import { env } from "../../config/env.js";
 import { getSetting } from "../../config/settings.js";
+import { assignInsight } from "../../agents/program-manager/assigner.js";
 
 const llm = new ChatAnthropic({
   model: "claude-haiku-4-5-20251001",
@@ -74,17 +75,20 @@ export async function extractInsightsFromMessages(hours = 4): Promise<number> {
 
   console.log(`  [Insights] Analyzing ${messages.length} messages from last ${hours}h...`);
 
-  // Group messages by group for context
-  const byGroup = new Map<string, typeof messages>();
+  // Group messages by group for context. Keep chatId for downstream assignment.
+  const byGroup = new Map<string, { name: string; chatId: string; msgs: typeof messages }>();
   for (const m of messages) {
-    const key = m.group?.chatName || m.chatId;
-    if (!byGroup.has(key)) byGroup.set(key, []);
-    byGroup.get(key)!.push(m);
+    const name = m.group?.chatName || m.chatId;
+    const chatId = m.chatId;
+    const cur = byGroup.get(chatId);
+    if (!cur) byGroup.set(chatId, { name, chatId, msgs: [m] });
+    else cur.msgs.push(m);
   }
 
   let totalExtracted = 0;
 
-  for (const [groupName, groupMsgs] of byGroup) {
+  for (const [, group] of byGroup) {
+    const { name: groupName, chatId: groupChatId, msgs: groupMsgs } = group;
     if (groupMsgs.length < 3) continue;
 
     // Build conversation context
@@ -113,10 +117,16 @@ export async function extractInsightsFromMessages(hours = 4): Promise<number> {
 
       if (!Array.isArray(insights) || insights.length === 0) continue;
 
-      // Save each insight with dedup
+      // Save each insight with dedup, then hand off to PM for auto-assignment.
       for (const ins of insights) {
-        await saveOrUpdateInsight(ins, groupName, groupMsgs.map((m) => m.id));
+        const createdId = await saveOrUpdateInsight(ins, groupName, groupChatId, groupMsgs.map((m) => m.id));
         totalExtracted++;
+        if (createdId && ins.status === "open") {
+          // Fire-and-forget assignment — don't block extraction on LLM round-trip.
+          assignInsight(createdId).catch((err) =>
+            console.warn(`  [PM] auto-assign failed for ${createdId}: ${err?.message}`),
+          );
+        }
       }
 
       console.log(`    ${groupName}: ${insights.length} insights`);
@@ -128,13 +138,16 @@ export async function extractInsightsFromMessages(hours = 4): Promise<number> {
   return totalExtracted;
 }
 
-// Dedup logic: match by (type + category + vehicleIds OR title similarity)
+// Dedup logic: match by (type + category + vehicleIds OR title similarity).
+// Returns the insight id if a NEW record was created (so callers can trigger
+// downstream work like PM assignment). Returns null on dedup-update.
 async function saveOrUpdateInsight(
   ins: ExtractedInsight,
   groupName: string,
+  groupChatId: string,
   relatedMessageIds: string[]
-): Promise<void> {
-  if (!ins.title || !ins.summary) return;
+): Promise<string | null> {
+  if (!ins.title || !ins.summary) return null;
 
   // Look for existing insight matching same vehicle/category/type
   const candidates = await prisma.waInsight.findMany({
@@ -179,26 +192,28 @@ async function saveOrUpdateInsight(
         ...(ins.status === "resolved" ? { status: "resolved", resolvedAt: new Date() } : {}),
       },
     });
-  } else {
-    // Create new insight
-    await prisma.waInsight.create({
-      data: {
-        type: ins.type,
-        title: ins.title.slice(0, 100),
-        summary: ins.summary.slice(0, 500),
-        severity: ins.severity,
-        category: ins.category,
-        status: ins.status,
-        groupName,
-        vehicleIds: ins.vehicleIds || [],
-        location: ins.location,
-        reporterNames: ins.reporterNames || [],
-        firstSeen: new Date(),
-        lastSeen: new Date(),
-        relatedMessageIds: relatedMessageIds.slice(0, 50),
-      },
-    });
+    return null;
   }
+  // Create new insight
+  const created = await prisma.waInsight.create({
+    data: {
+      type: ins.type,
+      title: ins.title.slice(0, 100),
+      summary: ins.summary.slice(0, 500),
+      severity: ins.severity,
+      category: ins.category,
+      status: ins.status,
+      groupName,
+      groupChatId,
+      vehicleIds: ins.vehicleIds || [],
+      location: ins.location,
+      reporterNames: ins.reporterNames || [],
+      firstSeen: new Date(),
+      lastSeen: new Date(),
+      relatedMessageIds: relatedMessageIds.slice(0, 50),
+    },
+  });
+  return created.id;
 }
 
 // Get recurring issues (for proactive response check)

@@ -241,17 +241,32 @@ model User {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  role            Role             @relation(fields: [roleId], references: [id])
-  orgNode         OrgNode          @relation(fields: [orgNodeId], references: [id])
-  auditLogs       AuditLog[]
-  conversations   Conversation[]
-  bookmarks       Bookmark[]
-  alertRules      AlertRule[]
-  scheduledReports ScheduledReport[]
-  csvUploads      CsvUpload[]
-  botPreferences  UserBotPreferences?
+  // Program-manager fields — enable the bot to assign, chase, and escalate
+  // issues intelligently. Populated via admin API (routes/team.ts) or seeded.
+  specialties       String[]  @default([])           @map("specialties")
+  waGroupIds        String[]  @default([])           @map("wa_group_ids")
+  reportsToId       String?                          @map("reports_to_id") @db.Uuid
+  isAvailable       Boolean   @default(true)         @map("is_available")
+  outOfOfficeUntil  DateTime?                        @map("out_of_office_until")
+  workingHoursStart Int       @default(9)            @map("working_hours_start") // 24h IST
+  workingHoursEnd   Int       @default(20)           @map("working_hours_end")
+
+  role              Role             @relation(fields: [roleId], references: [id])
+  orgNode           OrgNode          @relation(fields: [orgNodeId], references: [id])
+  reportsTo         User?            @relation("Reports", fields: [reportsToId], references: [id])
+  subordinates      User[]           @relation("Reports")
+  auditLogs         AuditLog[]
+  conversations     Conversation[]
+  bookmarks         Bookmark[]
+  alertRules        AlertRule[]
+  scheduledReports  ScheduledReport[]
+  csvUploads        CsvUpload[]
+  botPreferences    UserBotPreferences?
+  assignedInsights  WaInsight[]      @relation("InsightAssignee")
+  escalatedInsights WaInsight[]      @relation("InsightEscalatee")
 
   @@index([orgNodeId])
+  @@index([reportsToId])
   @@map("users")
 }
 
@@ -537,6 +552,24 @@ model WaInsight {
   resolvedBy        String?   @map("resolved_by") @db.Uuid
   notes             String?
 
+  // Program-manager tracking — who's on the hook, when to chase, escalation state.
+  groupChatId       String?   @map("group_chat_id")
+  assignedUserId    String?   @map("assigned_user_id") @db.Uuid
+  assignedAt        DateTime? @map("assigned_at")
+  assignmentReason  String?   @map("assignment_reason") @db.VarChar(500)
+  followupAt        DateTime? @map("followup_at")
+  reminderCount     Int       @default(0) @map("reminder_count")
+  lastReminderAt    DateTime? @map("last_reminder_at")
+  lastReminderText  String?   @map("last_reminder_text") @db.VarChar(1000)
+  escalationLevel   Int       @default(0) @map("escalation_level")
+  escalatedToUserId String?   @map("escalated_to_user_id") @db.Uuid
+  deferredUntil     DateTime? @map("deferred_until")
+  pmNotes           String?   @map("pm_notes") @db.Text
+  isStuck           Boolean   @default(false) @map("is_stuck")
+
+  assignedUser      User?     @relation("InsightAssignee", fields: [assignedUserId], references: [id])
+  escalatedToUser   User?     @relation("InsightEscalatee", fields: [escalatedToUserId], references: [id])
+
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
@@ -545,6 +578,9 @@ model WaInsight {
   @@index([category])
   @@index([lastSeen(sort: Desc)])
   @@index([occurrenceCount(sort: Desc)])
+  @@index([assignedUserId, status])
+  @@index([followupAt])
+  @@index([groupChatId, status])
   @@map("wa_insights")
 }
 
