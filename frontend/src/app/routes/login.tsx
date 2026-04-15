@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { GoogleLogin } from '@react-oauth/google'
 import { useAuthStore } from '@/stores/auth.store'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -218,50 +219,27 @@ function GoogleButtonRenderer({
     )
   }
 
-  // Use the credential callback approach
-  // Google's Identity Services library handles the button rendering
+  // Google's official button — library handles FedCM/popup fallback properly.
   return (
-    <>
-      <GoogleCredentialButton onSuccess={onSuccess} loading={loading} clientId={clientId} />
-    </>
-  )
-}
-
-function GoogleCredentialButton({
-  onSuccess,
-  loading,
-  clientId,
-}: {
-  onSuccess: (response: any) => void
-  loading: boolean
-  clientId: string
-}) {
-  // We'll use a custom styled button that triggers Google's popup
-  const handleClick = () => {
-    // @ts-ignore — google.accounts.id is loaded via the @react-oauth/google provider
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: onSuccess,
-      })
-      window.google.accounts.id.prompt()
-    }
-  }
-
-  return (
-    <Button
-      variant="outline"
-      className="w-full gap-2.5 h-11 text-[13px] font-medium"
-      onClick={handleClick}
-      disabled={loading}
-    >
+    <div className="w-full flex justify-center" style={{ colorScheme: 'light' }}>
       {loading ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
+        <Button variant="outline" className="w-full gap-2.5 h-11 text-[13px] font-medium" disabled>
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Signing in...
+        </Button>
       ) : (
-        <GoogleIcon />
+        <GoogleLogin
+          onSuccess={onSuccess}
+          onError={() => console.error('Google login failed')}
+          useOneTap={false}
+          theme="outline"
+          size="large"
+          text="continue_with"
+          shape="rectangular"
+          width="360"
+        />
       )}
-      {loading ? 'Signing in...' : 'Continue with Google'}
-    </Button>
+    </div>
   )
 }
 
