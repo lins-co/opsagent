@@ -22,14 +22,15 @@ Output STRICT JSON, no prose:
 If NO candidate is appropriate (e.g. category has no specialist and no group member), return:
 { "userId": null, "reason": "<why no assignment, ≤120 chars>" }
 
-Rules (in priority order):
-1. Specialty match on insight.category is the strongest signal.
-2. Membership in the insight's WhatsApp group is a strong secondary signal — they have context.
-3. Prefer 'employee' or 'manager' roles over 'admin'/'ceo' for frontline issues (admins escalate later).
-4. Break ties toward the candidate with the LOWEST current open load.
-5. NEVER assign to someone whose phone is null.
-6. For category="payment" prefer finance specialists; for "battery"/"charger"/"vehicle"/"app" prefer engineering.
-7. Critical-severity issues with no specialist → assign to the group's most senior member so they can delegate.
+Rules (in STRICT priority order):
+1. If insight.taggedNames is non-empty, the reporter explicitly asked THOSE people to handle it. ALWAYS assign to the tagged person if they appear in the candidates list. This is the STRONGEST signal — it overrides everything else.
+2. Specialty match on insight.category is the next strongest signal.
+3. Membership in the insight's WhatsApp group is a strong secondary signal — they have context.
+4. Prefer 'employee' or 'manager' roles over 'admin'/'ceo' for frontline issues (admins escalate later).
+5. Break ties toward the candidate with the LOWEST current open load.
+6. NEVER assign to someone whose phone is null.
+7. For category="payment" prefer finance specialists; for "battery"/"charger"/"vehicle"/"app" prefer engineering.
+8. Critical-severity issues with no specialist → assign to the group's most senior member so they can delegate.
 
 Be decisive. If the insight is ambiguous, assign to the group's senior-most candidate.`;
 
@@ -51,6 +52,28 @@ export async function assignInsight(insightId: string): Promise<AssignmentResult
     return { userId: null, reason: "no eligible team members (populate User.specialties & User.waGroupIds)" };
   }
 
+  // If someone was explicitly tagged in the group message ("@Ravi check this"),
+  // fuzzy-match their name against the roster and boost them to the top.
+  const taggedNames: string[] = (insight as any).taggedNames || [];
+  if (taggedNames.length > 0) {
+    for (const c of candidates) {
+      const cName = c.name.toLowerCase();
+      const cFirst = cName.split(/\s+/)[0];
+      const isTagged = taggedNames.some((t) => {
+        const tl = t.toLowerCase();
+        return cName.includes(tl) || tl.includes(cFirst);
+      });
+      if (isTagged) {
+        // Move this candidate to position 0 — the LLM and fallback will both prefer them.
+        const idx = candidates.indexOf(c);
+        if (idx > 0) {
+          candidates.splice(idx, 1);
+          candidates.unshift(c);
+        }
+      }
+    }
+  }
+
   const top = candidates.slice(0, 12);
   const ctx = {
     insight: {
@@ -65,6 +88,7 @@ export async function assignInsight(insightId: string): Promise<AssignmentResult
       vehicleIds: insight.vehicleIds,
       location: insight.location,
       reporterNames: insight.reporterNames,
+      taggedNames,
       occurrenceCount: insight.occurrenceCount,
       firstSeenHoursAgo: Math.round((Date.now() - insight.firstSeen.getTime()) / 3_600_000),
     },

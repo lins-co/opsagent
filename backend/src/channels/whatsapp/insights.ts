@@ -27,6 +27,7 @@ interface ExtractedInsight {
   vehicleIds?: string[];
   location?: string;
   reporterNames?: string[];
+  taggedNames?: string[];  // people explicitly addressed/tagged to handle the issue
   status: "open" | "resolved";
 }
 
@@ -45,6 +46,7 @@ Output STRICT JSON array — no prose, no markdown, just the array:
     "vehicleIds": ["KA51JN6518", ...],  // if mentioned
     "location": "Delhi" | "Bengaluru" | "Sector 62B" | ...,  // if mentioned
     "reporterNames": ["Neeraj Bisht", ...],
+    "taggedNames": ["Ravi", "Omkar", ...],  // people ADDRESSED to handle it (see rules below)
     "status": "open" | "resolved"
   }
 ]
@@ -55,6 +57,7 @@ Rules:
 - If someone says "done" or "resolved" → type="resolution", status="resolved"
 - Severity: critical=fleet-wide, high=multiple vehicles, medium=single issue, low=minor
 - Return [] if nothing worth tracking
+- taggedNames: people who the reporter is ASKING to handle the issue. Look for patterns like: "@Ravi please check", "Ravi check this", "can someone ask Omkar", "Neeraj please resolve", "Harsh pls look into this", "assigned to Amit". These are the people responsible — NOT the reporter themselves. If nobody is explicitly asked, leave taggedNames empty.
 
 Return ONLY the JSON array. No explanation.`;
 
@@ -186,6 +189,7 @@ async function saveOrUpdateInsight(
         occurrenceCount: { increment: 1 },
         lastSeen: new Date(),
         reporterNames: [...new Set([...match.reporterNames, ...(ins.reporterNames || [])])],
+        taggedNames: [...new Set([...(match as any).taggedNames || [], ...(ins.taggedNames || [])])],
         vehicleIds: [...new Set([...match.vehicleIds, ...(ins.vehicleIds || [])])],
         relatedMessageIds: [...new Set([...match.relatedMessageIds, ...relatedMessageIds])].slice(-50),
         // Mark resolved if this update says so
@@ -208,6 +212,7 @@ async function saveOrUpdateInsight(
       vehicleIds: ins.vehicleIds || [],
       location: ins.location,
       reporterNames: ins.reporterNames || [],
+      taggedNames: ins.taggedNames || [],
       firstSeen: new Date(),
       lastSeen: new Date(),
       relatedMessageIds: relatedMessageIds.slice(0, 50),
