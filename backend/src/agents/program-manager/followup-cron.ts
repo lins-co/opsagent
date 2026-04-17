@@ -12,7 +12,7 @@ import cron from "node-cron";
 import { prisma } from "../../db/prisma.js";
 import { isConnected } from "../../channels/whatsapp/client.js";
 import { assignAllPending, assignInsight } from "./assigner.js";
-import { composeFollowupDM, sendPmDM } from "./messenger.js";
+import { composeFollowupDM, sendPmDM, composeGroupFollowup, sendGroupFollowup } from "./messenger.js";
 import {
   getUserById,
   getManagerOf,
@@ -84,7 +84,7 @@ async function processOne(insight: any) {
     return;
   }
 
-  // Phase 0: initial polite ping
+  // Phase 0: initial private DM — gentle, gives them a chance to respond quietly.
   if (count === 0) {
     const text = await composeFollowupDM({
       insightId: insight.id,
@@ -97,67 +97,108 @@ async function processOne(insight: any) {
     return;
   }
 
-  // Phase 1: firmer nudge
+  // Phase 1: follow-up in the GROUP — visible to everyone. Also DM.
   if (count === 1) {
-    const text = await composeFollowupDM({
+    const dmText = await composeFollowupDM({
       insightId: insight.id,
       level: 1,
       recipientName: assignee.name,
       recipientRole: assignee.roleName,
     });
-    await sendPmDM(assignee.phone, text);
-    await recordReminder(insight.id, 2, text, 24);
+    await sendPmDM(assignee.phone, dmText);
+
+    // Post in the group for visibility
+    if (insight.groupChatId) {
+      const groupText = await composeGroupFollowup({
+        insightId: insight.id,
+        level: 1,
+        assigneeName: assignee.name,
+        assigneeRole: assignee.roleName,
+      });
+      await sendGroupFollowup(insight.groupChatId, groupText).catch((err: any) =>
+        console.warn(`  [PM] group msg failed: ${err?.message}`),
+      );
+    }
+    await recordReminder(insight.id, 2, dmText, 24);
     return;
   }
 
-  // Phase 2: escalate to manager + tell assignee
+  // Phase 2: escalate — group message tagging assignee + manager. DM both.
   if (count === 2) {
     const mgr = await getManagerOf(assignee.id);
 
-    const text = await composeFollowupDM({
+    const dmText = await composeFollowupDM({
       insightId: insight.id,
       level: 2,
       recipientName: assignee.name,
       recipientRole: assignee.roleName,
       ccManagerName: mgr?.name || null,
     });
-    await sendPmDM(assignee.phone, text);
+    await sendPmDM(assignee.phone, dmText);
 
     if (mgr?.phone) {
-      const mgrText = await composeFollowupDM({
+      const mgrDm = await composeFollowupDM({
         insightId: insight.id,
         level: 2,
         recipientName: mgr.name,
         recipientRole: mgr.roleName,
-        ccManagerName: assignee.name, // reversed — telling the mgr who owns it
+        ccManagerName: assignee.name,
       });
-      await sendPmDM(mgr.phone, mgrText);
+      await sendPmDM(mgr.phone, mgrDm);
       await prisma.waInsight.update({
         where: { id: insight.id },
         data: { escalatedToUserId: mgr.id, escalationLevel: 1 },
       });
     }
-    await recordReminder(insight.id, 3, text, 48);
+
+    // Group message with manager cc
+    if (insight.groupChatId) {
+      const groupText = await composeGroupFollowup({
+        insightId: insight.id,
+        level: 2,
+        assigneeName: assignee.name,
+        assigneeRole: assignee.roleName,
+        ccManagerName: mgr?.name || null,
+      });
+      await sendGroupFollowup(insight.groupChatId, groupText).catch((err: any) =>
+        console.warn(`  [PM] group msg failed: ${err?.message}`),
+      );
+    }
+    await recordReminder(insight.id, 3, dmText, 48);
     return;
   }
 
-  // Phase 3: senior escalation (VP/CEO/admin)
+  // Phase 3: senior escalation — group + DM to VP/CEO/admin.
   if (count === 3) {
     const senior = await escalateTo(assignee.id);
     if (senior?.phone) {
-      const text = await composeFollowupDM({
+      const dmText = await composeFollowupDM({
         insightId: insight.id,
         level: 3,
         recipientName: senior.name,
         recipientRole: senior.roleName,
       });
-      await sendPmDM(senior.phone, text);
+      await sendPmDM(senior.phone, dmText);
       await prisma.waInsight.update({
         where: { id: insight.id },
         data: { escalatedToUserId: senior.id, escalationLevel: 2 },
       });
     }
-    await recordReminder(insight.id, 4, "escalated to senior", 72);
+
+    // Final group escalation message
+    if (insight.groupChatId) {
+      const groupText = await composeGroupFollowup({
+        insightId: insight.id,
+        level: 3,
+        assigneeName: assignee.name,
+        assigneeRole: assignee.roleName,
+        ccManagerName: senior?.name || null,
+      });
+      await sendGroupFollowup(insight.groupChatId, groupText).catch((err: any) =>
+        console.warn(`  [PM] group msg failed: ${err?.message}`),
+      );
+    }
+    await recordReminder(insight.id, 4, "escalated to senior + group", 72);
     return;
   }
 

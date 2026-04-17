@@ -108,3 +108,82 @@ export async function sendPmDM(phone: string, text: string): Promise<void> {
   if (!isConnected()) throw new Error("WhatsApp not connected");
   await sendMessage(phoneToChatId(phone), text);
 }
+
+// ──────────────────────────────────────────────────────────────
+// Group follow-up — posts a visible message in the WA group
+// tagging the responsible person. More effective than DMs for
+// accountability because the whole team sees progress.
+// ──────────────────────────────────────────────────────────────
+
+const GROUP_FOLLOWUP_PROMPT = `You are the program-manager bot for EMO Energy, posting a follow-up in a WhatsApp operations group.
+
+HARD RULES:
+- ≤ 3 lines. Plain WhatsApp text. No markdown, no asterisks.
+- Start with the assignee's first name (they'll see it in the group).
+- State the issue clearly (vehicle IDs, category, location if known).
+- End with ONE specific ask — "can you confirm status?" or "what's blocking?" — not both.
+- If a manager is cc'd, mention them by first name ("Looping in <Manager>").
+- NEVER fabricate data. Use only what's provided.
+- Be professional and direct — the whole team reads this.`;
+
+export async function composeGroupFollowup(params: {
+  insightId: string;
+  level: Level;
+  assigneeName: string;
+  assigneeRole: string;
+  ccManagerName?: string | null;
+}): Promise<string> {
+  const insight = await prisma.waInsight.findUnique({
+    where: { id: params.insightId },
+    select: {
+      title: true,
+      summary: true,
+      severity: true,
+      category: true,
+      groupName: true,
+      vehicleIds: true,
+      location: true,
+      reporterNames: true,
+      firstSeen: true,
+      occurrenceCount: true,
+    },
+  });
+  if (!insight) throw new Error(`insight ${params.insightId} not found`);
+
+  const hoursOpen = Math.round((Date.now() - insight.firstSeen.getTime()) / 3_600_000);
+
+  const ctx = {
+    assignee: {
+      firstName: params.assigneeName.split(/\s+/)[0],
+      role: params.assigneeRole,
+    },
+    escalation: {
+      level: params.level,
+      ccManager: params.ccManagerName || null,
+    },
+    issue: {
+      title: insight.title,
+      summary: insight.summary,
+      severity: insight.severity,
+      category: insight.category,
+      hoursOpen,
+      vehicleIds: insight.vehicleIds.slice(0, 3),
+      location: insight.location,
+      reportedBy: insight.reporterNames.slice(0, 3),
+      seenTimes: insight.occurrenceCount,
+    },
+  };
+
+  const res = await llm.invoke([
+    new SystemMessage(GROUP_FOLLOWUP_PROMPT),
+    new HumanMessage(
+      `Context JSON:\n${JSON.stringify(ctx, null, 2)}\n\nWrite the group message only, no preface.`,
+    ),
+  ]);
+  return (res.content as string).trim().slice(0, 900);
+}
+
+export async function sendGroupFollowup(groupChatId: string, text: string): Promise<void> {
+  if (!isConnected()) throw new Error("WhatsApp not connected");
+  await sendMessage(groupChatId, text);
+}
