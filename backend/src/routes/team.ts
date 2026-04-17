@@ -100,4 +100,23 @@ router.get("/insights", requireAuth, requireAdmin, async (_req, res) => {
   res.json({ open, stuck, recentResolved });
 });
 
+// PATCH /api/team/insights/:id/assign — reassign an insight
+router.patch("/insights/:id/assign", requireAuth, requireAdmin, async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) { res.status(400).json({ error: "userId required" }); return; }
+  await prisma.waInsight.update({
+    where: { id: String(req.params.id) },
+    data: {
+      assignedUserId: userId,
+      assignedAt: new Date(),
+      assignmentReason: `manually reassigned by admin (${req.user!.name})`,
+      reminderCount: 0,
+      escalationLevel: 0,
+      isStuck: false,
+      followupAt: new Date(Date.now() + 8 * 3_600_000),
+    },
+  });
+  res.json({ ok: true });
+});
+
 export default router;

@@ -16,7 +16,8 @@ import {
   PanelLeft,
   Settings,
   Bell,
-  Search
+  Search,
+  Target,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { to: '/chat', label: 'Intelligence Chat', icon: MessageSquareText },
   { to: '/schedule', label: 'Automations', icon: CalendarClock },
   { to: '/whatsapp', label: 'WhatsApp Connect', icon: MessageCircle },
+  { to: '/settings/pm', label: 'Program Manager', icon: Target },
 ]
 
 const INSIGHTS = [

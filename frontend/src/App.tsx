@@ -9,6 +9,7 @@ import SchedulePage from '@/app/routes/schedule/index'
 import WhatsAppPage from '@/app/routes/whatsapp/index'
 import ProfileSettings from '@/app/routes/settings/profile'
 import SystemSettings from '@/app/routes/settings/system'
+import ProgramManagerPanel from '@/app/routes/settings/program-manager'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token)
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/whatsapp" element={<WhatsAppPage />} />
         <Route path="/settings" element={<ProfileSettings />} />
         <Route path="/settings/system" element={<SystemSettings />} />
+        <Route path="/settings/pm" element={<ProgramManagerPanel />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
