@@ -12,7 +12,7 @@ import cron from "node-cron";
 import { prisma } from "../../db/prisma.js";
 import { isConnected } from "../../channels/whatsapp/client.js";
 import { assignAllPending, assignInsight } from "./assigner.js";
-import { composeFollowupDM, sendPmDM, composeGroupFollowup, sendGroupFollowup } from "./messenger.js";
+import { composeFollowupDM, sendPmDM, queuePmDM, composeGroupFollowup, sendGroupFollowup } from "./messenger.js";
 import {
   getUserById,
   getManagerOf,
@@ -92,7 +92,7 @@ async function processOne(insight: any) {
       recipientName: assignee.name,
       recipientRole: assignee.roleName,
     });
-    await sendPmDM(assignee.phone, text);
+    await queuePmDM({ userId: assignee.id, phone: assignee.phone, text, insightId: insight.id, level: 0 });
     await recordReminder(insight.id, 1, text, 24);
     return;
   }
@@ -105,7 +105,7 @@ async function processOne(insight: any) {
       recipientName: assignee.name,
       recipientRole: assignee.roleName,
     });
-    await sendPmDM(assignee.phone, dmText);
+    await queuePmDM({ userId: assignee.id, phone: assignee.phone, text: dmText, insightId: insight.id, level: 1 });
 
     // Post in the group for visibility
     if (insight.groupChatId) {
@@ -134,7 +134,7 @@ async function processOne(insight: any) {
       recipientRole: assignee.roleName,
       ccManagerName: mgr?.name || null,
     });
-    await sendPmDM(assignee.phone, dmText);
+    await queuePmDM({ userId: assignee.id, phone: assignee.phone, text: dmText, insightId: insight.id, level: 2, ccManagerId: mgr?.id || null });
 
     if (mgr?.phone) {
       const mgrDm = await composeFollowupDM({
@@ -144,7 +144,7 @@ async function processOne(insight: any) {
         recipientRole: mgr.roleName,
         ccManagerName: assignee.name,
       });
-      await sendPmDM(mgr.phone, mgrDm);
+      await queuePmDM({ userId: mgr.id, phone: mgr.phone, text: mgrDm, insightId: insight.id, level: 2 });
       await prisma.waInsight.update({
         where: { id: insight.id },
         data: { escalatedToUserId: mgr.id, escalationLevel: 1 },
@@ -178,7 +178,7 @@ async function processOne(insight: any) {
         recipientName: senior.name,
         recipientRole: senior.roleName,
       });
-      await sendPmDM(senior.phone, dmText);
+      await queuePmDM({ userId: senior.id, phone: senior.phone, text: dmText, insightId: insight.id, level: 3 });
       await prisma.waInsight.update({
         where: { id: insight.id },
         data: { escalatedToUserId: senior.id, escalationLevel: 2 },

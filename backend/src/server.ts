@@ -15,6 +15,7 @@ import settingsRouter from "./routes/settings.js";
 import botPrefsRouter from "./routes/bot-prefs.js";
 import teamRouter from "./routes/team.js";
 import { startPmCron } from "./agents/program-manager/followup-cron.js";
+import { startDigestCron } from "./agents/program-manager/digest-cron.js";
 import { startScheduler } from "./agents/intelligence/scheduler.js";
 import { startInsightsCron } from "./agents/intelligence/insights-cron.js";
 import { initWhatsApp } from "./channels/whatsapp/client.js";
@@ -146,6 +147,9 @@ async function main() {
 
     // Start program-manager follow-up cron (assigns + chases open insights)
     await startPmCron();
+
+    // Start daily PM DM digest cron (once per user per day)
+    await startDigestCron();
 
     // Connect WhatsApp (server-level, shared across all users)
     // If already authenticated from a previous session, it reconnects automatically.

@@ -251,6 +251,9 @@ model User {
   workingHoursStart Int       @default(9)            @map("working_hours_start") // 24h IST
   workingHoursEnd   Int       @default(20)           @map("working_hours_end")
 
+  // Tracks last daily PM DM digest — enforces "once per day" rule
+  lastPmDigestAt    DateTime?                        @map("last_pm_digest_at")
+
   role              Role             @relation(fields: [roleId], references: [id])
   orgNode           OrgNode          @relation(fields: [orgNodeId], references: [id])
   reportsTo         User?            @relation("Reports", fields: [reportsToId], references: [id])
@@ -612,6 +615,27 @@ model WaMediaFile {
   @@index([chatId, timestamp(sort: Desc)])
   @@index([mediaType])
   @@map("wa_media_files")
+}
+
+// ══════════════════════════════════════════════════════
+// Queued PM DMs — "once per user per day" batching.
+// PM inserts rows here instead of sending immediately;
+// the digest cron collates + sends once per user per day.
+// ══════════════════════════════════════════════════════
+model PmDmQueue {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  insightId   String?  @map("insight_id") @db.Uuid   // Source insight (if any)
+  level       Int      @default(0)                     // 0-3 escalation level
+  text        String                                   // Proposed DM text
+  ccManagerId String?  @map("cc_manager_id") @db.Uuid  // Manager to also loop in
+  sentAt      DateTime? @map("sent_at")                // When the digest actually fired
+  skippedReason String? @map("skipped_reason")         // If skipped, why
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId, sentAt])
+  @@index([createdAt])
+  @@map("pm_dm_queue")
 }
 
 // ══════════════════════════════════════════════════════

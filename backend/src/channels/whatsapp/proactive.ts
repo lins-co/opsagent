@@ -1,6 +1,6 @@
 import { ChatAnthropic } from "@langchain/anthropic";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
-import { getSetting, isEnabled } from "../../config/settings.js";
+import { getSetting, isEnabled, isBotMuted } from "../../config/settings.js";
 import { extractEntities } from "./extract.js";
 import { getRecurringInsights } from "./insights.js";
 import { prisma } from "../../db/prisma.js";
@@ -200,6 +200,10 @@ export async function checkProactiveResponse(msg: {
   chatId: string;
   senderName: string;
 }): Promise<ProactiveResult> {
+  // Master mute — kills ALL outbound notifications
+  if (await isBotMuted()) {
+    return { shouldRespond: false };
+  }
   // Global switch
   if (!(await isEnabled("wa.proactive_responses"))) {
     return { shouldRespond: false };

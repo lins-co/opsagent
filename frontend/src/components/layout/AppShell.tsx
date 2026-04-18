@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { ThemeToggle } from '@/components/theme-toggle'
+import MuteBanner from '@/components/MuteBanner'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -198,6 +199,9 @@ export default function AppShell() {
             </div>
           </div>
         </header>
+
+        {/* ─── Mute Banner (global) ─── */}
+        <MuteBanner />
 
         {/* ─── Page Outlet ─── */}
         <main className="flex-1 overflow-hidden relative">

@@ -6,6 +6,7 @@ import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { prisma } from "../../db/prisma.js";
 import { env } from "../../config/env.js";
 import { sendMessage, isConnected } from "../../channels/whatsapp/client.js";
+import { isEnabled, isBotMuted, getSetting } from "../../config/settings.js";
 
 const llm = new ChatAnthropic({
   model: "claude-haiku-4-5-20251001",
@@ -104,9 +105,91 @@ export function phoneToChatId(phone: string): string {
   return `${digits}@c.us`;
 }
 
+// Legacy entry point — sends a DM immediately, respecting kill switches.
+// For normal PM flow, use queuePmDM() so daily digest batching kicks in.
 export async function sendPmDM(phone: string, text: string): Promise<void> {
+  if (await isBotMuted()) {
+    console.log(`  [PM DM] Skipped — bot is MUTED (would send to +${phone})`);
+    return;
+  }
+  if (!(await isEnabled("pm.dms_enabled"))) {
+    console.log(`  [PM DM] Skipped — pm.dms_enabled is OFF (would send to +${phone})`);
+    return;
+  }
   if (!isConnected()) throw new Error("WhatsApp not connected");
   await sendMessage(phoneToChatId(phone), text);
+}
+
+// Queue a DM for later digest delivery. If digest mode is OFF, sends immediately.
+// Enforces "once per user per day" when digest mode is ON.
+export async function queuePmDM(params: {
+  userId: string;
+  phone: string;
+  text: string;
+  insightId?: string;
+  level?: number;
+  ccManagerId?: string | null;
+}): Promise<{ queued: boolean; sent: boolean; reason?: string }> {
+  // Master mute
+  if (await isBotMuted()) {
+    return { queued: false, sent: false, reason: "bot muted" };
+  }
+  if (!(await isEnabled("pm.dms_enabled"))) {
+    return { queued: false, sent: false, reason: "pm.dms_enabled off" };
+  }
+
+  const digestMode = await isEnabled("pm.dm_digest_mode");
+  if (!digestMode) {
+    // Legacy: send immediately
+    await sendPmDM(params.phone, params.text);
+    return { queued: false, sent: true };
+  }
+
+  // Queue for digest — but first, check if user already got a digest today
+  const user = await prisma.user.findUnique({
+    where: { id: params.userId },
+    select: { lastPmDigestAt: true },
+  });
+  if (user?.lastPmDigestAt) {
+    const hoursSince = (Date.now() - user.lastPmDigestAt.getTime()) / 3_600_000;
+    if (hoursSince < 22) {
+      // Already messaged today — queue it for tomorrow's digest
+      console.log(`  [PM DM Queue] User ${params.userId} already got today's digest, queueing for next cycle`);
+    }
+  }
+
+  // Dedupe: skip if same insight already queued, unsent, for same user
+  if (params.insightId) {
+    const existing = await prisma.pmDmQueue.findFirst({
+      where: {
+        userId: params.userId,
+        insightId: params.insightId,
+        sentAt: null,
+      },
+    });
+    if (existing) {
+      // Update level if this is a higher-priority escalation
+      if ((params.level || 0) > existing.level) {
+        await prisma.pmDmQueue.update({
+          where: { id: existing.id },
+          data: { level: params.level || 0, text: params.text, ccManagerId: params.ccManagerId || null },
+        });
+      }
+      return { queued: true, sent: false, reason: "deduped" };
+    }
+  }
+
+  await prisma.pmDmQueue.create({
+    data: {
+      userId: params.userId,
+      insightId: params.insightId || null,
+      level: params.level || 0,
+      text: params.text,
+      ccManagerId: params.ccManagerId || null,
+    },
+  });
+
+  return { queued: true, sent: false };
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -184,6 +267,14 @@ export async function composeGroupFollowup(params: {
 }
 
 export async function sendGroupFollowup(groupChatId: string, text: string): Promise<void> {
+  if (await isBotMuted()) {
+    console.log(`  [PM Group] Skipped — bot is MUTED (would post to ${groupChatId})`);
+    return;
+  }
+  if (!(await isEnabled("pm.group_followups_enabled"))) {
+    console.log(`  [PM Group] Skipped — pm.group_followups_enabled is OFF (would post to ${groupChatId})`);
+    return;
+  }
   if (!isConnected()) throw new Error("WhatsApp not connected");
   await sendMessage(groupChatId, text);
 }
