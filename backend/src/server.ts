@@ -18,6 +18,7 @@ import { startPmCron } from "./agents/program-manager/followup-cron.js";
 import { startDigestCron } from "./agents/program-manager/digest-cron.js";
 import { startScheduler } from "./agents/intelligence/scheduler.js";
 import { startInsightsCron } from "./agents/intelligence/insights-cron.js";
+import { startBriefingCron } from "./agents/intelligence/briefing-cron.js";
 import { initWhatsApp } from "./channels/whatsapp/client.js";
 
 const app = express();
@@ -150,6 +151,9 @@ async function main() {
 
     // Start daily PM DM digest cron (once per user per day)
     await startDigestCron();
+
+    // Start daily briefing cron (personalized per-user morning summary)
+    await startBriefingCron();
 
     // Connect WhatsApp (server-level, shared across all users)
     // If already authenticated from a previous session, it reconnects automatically.

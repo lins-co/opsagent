@@ -99,9 +99,16 @@ OUTPUT STYLE:
 export async function financeAgentNode(state: AgentStateType) {
   const msgs = state.messages;
   const prefsPrefix = state.botPrefsPrompt || "";
+  const userName = state.userName;
+  const userRole = state.userRole;
+  const memoryBlock = state.userMemoryBlock;
 
   let currentMessages: any[] = [
-    new SystemMessage(prefsPrefix + buildSystemPrompt()),
+    new SystemMessage(
+      prefsPrefix + buildSystemPrompt() +
+      (userName ? `\nThe user you are talking to is ${userName} (role: ${userRole}).` : "") +
+      (memoryBlock ? `\n\n${memoryBlock}\n` : "")
+    ),
     ...msgs.slice(-6),
   ];
 

@@ -35,6 +35,15 @@ export const AgentState = Annotation.Root({
     reducer: (_prev, next) => next,
     default: () => "",
   }),
+  // Memory about the caller — injected into every agent's system prompt
+  userMemoryBlock: Annotation<string>({
+    reducer: (_prev, next) => next,
+    default: () => "",
+  }),
+  userName: Annotation<string>({
+    reducer: (_prev, next) => next,
+    default: () => "",
+  }),
 });
 
 export type AgentStateType = typeof AgentState.State;

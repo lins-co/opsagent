@@ -105,6 +105,9 @@ export async function reportAgentNode(state: AgentStateType) {
   } catch { /* WhatsApp not connected, skip */ }
 
   const prefsPrefix = state.botPrefsPrompt || "";
+  const userName = state.userName;
+  const userRole = state.userRole;
+  const memoryBlock = state.userMemoryBlock;
   const response = await llm.invoke([
     new SystemMessage(prefsPrefix + `You are EMO's Report Intelligence Agent. Generate operational reports.
 Today: ${new Date().toISOString().split("T")[0]}
@@ -115,7 +118,10 @@ CRITICAL RULES:
 - Deployementresponses (${context.includes("deployment records") ? "historical deployment records" : ""}). This is NOT "active deployments" — it's a log of all deployment events. Fleet size = Vehicletracker count.
 - Rentingdatabase = rental records, NOT "active rentals" necessarily. Check Status field.
 - Use EXACT numbers from data above. Never inflate or misinterpret.
-- Format as a professional report with markdown headers, tables, key metrics, and risk highlights.`),
+- Format as a professional report with markdown headers, tables, key metrics, and risk highlights.` +
+      (userName ? `\nThe user you are talking to is ${userName} (role: ${userRole}).` : "") +
+      (memoryBlock ? `\n\n${memoryBlock}\n` : "")
+    ),
     ...msgs.slice(-4),
   ]);
 

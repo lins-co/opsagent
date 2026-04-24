@@ -89,8 +89,11 @@ router.post("/chat", requireAuth, async (req, res) => {
 
       const result = await invokeAgent(message, {
         userId: req.user!.userId,
+        userName: req.user!.name,
         userRole: req.user!.role,
+        userPhone: (req.user as any)!.phone || null,
         orgScope: req.user!.allowedLocations,
+        channel: "web",
         conversationHistory: history.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
         onStatus: (status, node) => {
           res.write(`data: ${JSON.stringify({ type: "status", status, node })}\n\n`);
@@ -134,8 +137,11 @@ router.post("/chat", requireAuth, async (req, res) => {
     const startTime = Date.now();
     const result = await invokeAgent(message, {
       userId: req.user!.userId,
+      userName: req.user!.name,
       userRole: req.user!.role,
+      userPhone: (req.user as any)!.phone || null,
       orgScope: req.user!.allowedLocations,
+      channel: "web",
       conversationHistory: history.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
     });
     const latencyMs = Date.now() - startTime;

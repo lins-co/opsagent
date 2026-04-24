@@ -626,8 +626,11 @@ async function handleDMBot(msg: any) {
 
     const result = await invokeAgent(body, {
       userId: user.id,
+      userName: user.name,
       userRole: user.role.name,
+      userPhone: user.phone || null,
       orgScope,
+      channel: "whatsapp_dm",
       conversationHistory: history.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
       botPrefsPrompt,
     });
@@ -826,8 +829,11 @@ async function handleGroupMention(msg: any) {
 
     const result = await invokeAgent(body, {
       userId: userId,
+      userName: userName,
       userRole: userRole,
+      userPhone: user?.phone || null,
       orgScope,
+      channel: "whatsapp_group",
       conversationHistory: [], // Stateless — each group mention is independent
     });
 

@@ -254,11 +254,19 @@ model User {
   // Tracks last daily PM DM digest — enforces "once per day" rule
   lastPmDigestAt    DateTime?                        @map("last_pm_digest_at")
 
+  // Daily briefing subscription (personalized morning/evening summary)
+  briefingEnabled   Boolean   @default(false)        @map("briefing_enabled")
+  briefingHourIst   Int       @default(9)            @map("briefing_hour_ist")
+  briefingChannel   String    @default("whatsapp")   @map("briefing_channel") // "whatsapp" | "email" | "both"
+  briefingFocus     String?                          @map("briefing_focus") // optional free-text of what to include
+  lastBriefingAt    DateTime?                        @map("last_briefing_at")
+
   role              Role             @relation(fields: [roleId], references: [id])
   orgNode           OrgNode          @relation(fields: [orgNodeId], references: [id])
   reportsTo         User?            @relation("Reports", fields: [reportsToId], references: [id])
   subordinates      User[]           @relation("Reports")
   auditLogs         AuditLog[]
+  memories          UserMemory[]
   conversations     Conversation[]
   bookmarks         Bookmark[]
   alertRules        AlertRule[]
@@ -615,6 +623,30 @@ model WaMediaFile {
   @@index([chatId, timestamp(sort: Desc)])
   @@index([mediaType])
   @@map("wa_media_files")
+}
+
+// ══════════════════════════════════════════════════════
+// User Memory — facts the bot learns about each user over time.
+// Auto-extracted from conversation turns + set explicitly via tools.
+// Injected into system prompt on every interaction for personalization.
+// ══════════════════════════════════════════════════════
+model UserMemory {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  type        String   // "preference" | "role_context" | "working_pattern" | "expertise" | "interest" | "relationship" | "style"
+  content     String   // Short fact, max ~200 chars ("prefers concise answers")
+  source      String   @default("learned") // "learned" | "explicit" | "observed"
+  confidence  Float    @default(0.7)
+  reinforced  Int      @default(1) // How many times this fact has been confirmed
+  lastSeen    DateTime @default(now()) @map("last_seen")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([userId, reinforced(sort: Desc)])
+  @@map("user_memory")
 }
 
 // ══════════════════════════════════════════════════════

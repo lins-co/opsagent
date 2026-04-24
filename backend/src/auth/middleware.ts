@@ -41,10 +41,10 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       allowedLocations,
     };
 
-    // Resolve user name
+    // Resolve user name + phone
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
-      select: { name: true, isActive: true },
+      select: { name: true, phone: true, isActive: true },
     });
 
     if (!user || !user.isActive) {
@@ -53,6 +53,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     }
 
     req.user.name = user.name;
+    (req.user as any).phone = user.phone;
     next();
   } catch {
     res.status(401).json({ error: "Invalid or expired token" });

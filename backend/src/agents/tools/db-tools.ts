@@ -480,9 +480,11 @@ function computeAggregateInJs(
 import { whatsappTools } from "./whatsapp-tools.js";
 import { runAnalysisTool } from "./sandbox.js";
 import { memoryTools } from "./memory-tools.js";
+import { commandTools } from "./command-tools.js";
+import { userMemoryTools } from "./memory-user-tools.js";
 
 export const dbTools = [queryCollectionTool, aggregateDataTool];
-export const allTools = [...dbTools, ...whatsappTools, ...memoryTools, runAnalysisTool];
+export const allTools = [...dbTools, ...whatsappTools, ...memoryTools, ...commandTools, ...userMemoryTools, runAnalysisTool];
 
 export async function executeTool(name: string, args: any): Promise<string> {
   const toolMap: Record<string, any> = {};

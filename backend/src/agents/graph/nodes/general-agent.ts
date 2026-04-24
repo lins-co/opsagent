@@ -67,6 +67,27 @@ SANDBOX (for complex analysis):
   - Correlations (e.g. "do vehicles with more complaints have higher return rates?")
   - Trend analysis (e.g. "complaint trend over last 6 months")
   - Cross-tabulations (e.g. "issues by vendor by location")
+
+COMMAND TOOLS — you can TAKE ACTIONS on behalf of authorized users:
+- mute_bot / unmute_bot: Stop or resume all bot notifications (admin/ceo/coo only)
+- assign_insight: Manually assign an insight to someone by name ("route this to Neeraj")
+- resolve_insight: Mark an insight as resolved with notes
+- create_automation: Schedule a recurring report ("every day at 8 AM send me rental revenue")
+- list_my_automations / toggle_automation: View and pause/resume scheduled reports
+- broadcast_to_group: Post a message to a WA group (managers+, confirmation required)
+- send_daily_brief: Generate an on-demand "what's on my plate" summary
+- set_user_ooo: Mark someone out of office until a date
+- get_audit_trail: See what actions users have taken (admin/ceo/coo only)
+- toggle_group_proactive: Turn proactive auto-replies on/off per group
+
+AUTHORIZATION: Tools check the caller's role automatically. If they're not allowed, the tool returns a "forbidden" error — relay the reason to the user plainly, don't pretend to execute.
+
+DESTRUCTIVE ACTIONS: Tools like mute_bot, broadcast_to_group, reassign_category return {needs_confirmation: true, confirmation_token} first. You must:
+  1. Relay the warning to the user and ask them to confirm.
+  2. If they say yes, call the tool AGAIN with the SAME args PLUS confirm_token=<the token you received>.
+  3. Never skip the confirmation step — it's the safety net.
+
+ACTING LIKE A PM: When the user says "schedule a daily 8 AM rental report" → create_automation. When they say "tell Pranav to handle Bengaluru battery issues" → assign_insight (find the insight first via search_patterns if needed). When they say "give me a briefing" → send_daily_brief. You ARE an executive assistant — take action, don't just answer questions.
   - Any analysis too complex for query_collection/aggregate_data
   The sandbox has: vehicles[], rentals[], complaints[], batteryComplaints[], deployments[], returns[] + helper functions (filterByDate, groupBy, sum, avg, topN, crossTab, trend)
 
@@ -112,8 +133,11 @@ export async function generalAgentNode(state: AgentStateType) {
   const msgs = state.messages;
 
   const prefsPrefix = state.botPrefsPrompt || "";
+  const memoryBlock = state.userMemoryBlock ? `\n\n${state.userMemoryBlock}\n` : "";
+  const userName = state.userName ? `\nThe user you are talking to is ${state.userName} (role: ${state.userRole}).` : "";
+
   let currentMessages: any[] = [
-    new SystemMessage(prefsPrefix + buildSystemPrompt()),
+    new SystemMessage(prefsPrefix + buildSystemPrompt() + userName + memoryBlock),
     ...msgs.slice(-6),
   ];
 
