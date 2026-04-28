@@ -701,27 +701,26 @@ async function isBotMentioned(msg: any): Promise<boolean> {
     const id = typeof mid === "string" ? mid : (mid?._serialized || mid?.user || "");
     if (!id) continue;
 
-    // Check phone number match
-    if (id.includes(connectedNumber)) return true;
-
-    // Check against known LIDs
+    // STRICT phone match — only the exact phone JID counts as a hit
     const idUser = id.split("@")[0];
+    if (idUser === connectedNumber) return true;
+
+    // Check against verified bot LIDs
     if (botLids.has(idUser) || botLids.has(id)) return true;
   }
 
-  // Fallback: check message body
+  // Fallback: check message body for explicit "@<connectedNumber>"
   if ((msg.body || "").includes(`@${connectedNumber}`)) return true;
 
-  // Unknown mention — try to resolve the LID to see if it's actually us
+  // Unknown LID — verify each via contact lookup. STRICT phone equality.
   for (const mid of mentionedIds) {
     const id = typeof mid === "string" ? mid : (mid?._serialized || mid?.user || "");
     if (!id || !id.includes("@lid")) continue;
 
     try {
       const contact = await client!.getContactById(id);
-      const phone = contact.number || "";
-      if (phone === connectedNumber || phone.endsWith(connectedNumber)) {
-        // This LID IS us! Save it and return true
+      const phone = String(contact.number || "");
+      if (phone === connectedNumber) {
         const lidUser = id.split("@")[0];
         botLids.add(lidUser);
         botLids.add(id);
@@ -737,29 +736,47 @@ async function isBotMentioned(msg: any): Promise<boolean> {
 
 // Learn bot's LID from outgoing messages (most reliable way)
 function learnBotLid(msg: any) {
-  // Check every field that might contain the bot's LID
-  const candidates = [
-    msg.author,
-    msg.from,
-    msg.to,
-    msg.id?.participant,
-    msg.id?.remote,
+  // Only trust SENDER fields. NEVER trust msg.from / msg.to / msg.id.remote in groups —
+  // those are the GROUP ID, not the bot. That's how botLids gets polluted with random
+  // group/person IDs and triggers false-positive @mention matches.
+  const senderCandidates = [
+    msg.author,             // sender of message (in groups)
+    msg.id?.participant,    // explicit participant on msg.id
     msg._data?.author,
-    msg._data?.from,
     msg._data?.participant,
   ];
 
-  for (const c of candidates) {
+  for (const c of senderCandidates) {
     if (!c) continue;
     const val = typeof c === "string" ? c : (c._serialized || "");
     if (!val) continue;
+
+    // Must be a LID (ends with @lid) — group IDs end with @g.us, phone IDs with @c.us
+    if (!val.endsWith("@lid")) continue;
+
     const user = val.split("@")[0];
-    // It's a LID if it's a long numeric ID that isn't our phone number
-    if (user && /^\d{10,}$/.test(user) && user !== connectedNumber && !botLids.has(user)) {
-      botLids.add(user);
-      botLids.add(`${user}@lid`);
-      console.log(`  [WA Bot] Learned bot LID from outgoing: ${user}`);
-    }
+    // LIDs are typically 14-15 digits; group IDs are 18+. Cap the length too.
+    if (!/^\d{10,17}$/.test(user)) continue;
+    if (user === connectedNumber) continue;
+    if (botLids.has(user)) continue;
+
+    // VERIFY against contact resolution before trusting — this confirms the LID is actually the bot.
+    (async () => {
+      try {
+        const contact = await client!.getContactById(val);
+        const phone = String(contact.number || "");
+        // Strict: must equal connectedNumber exactly. No endsWith — too loose.
+        if (phone === connectedNumber) {
+          botLids.add(user);
+          botLids.add(`${user}@lid`);
+          console.log(`  [WA Bot] Verified bot LID: ${user} (resolved to +${phone})`);
+        } else {
+          console.log(`  [WA Bot] Rejected LID candidate ${user} — resolved to +${phone}, not bot`);
+        }
+      } catch {
+        // contact lookup failed — don't trust
+      }
+    })();
   }
 }
 
@@ -851,10 +868,9 @@ async function handleGroupMention(msg: any) {
     console.log(`  [WA Bot] ✓ Group reply to ${userName} via ${result.agent} agent (${latencyMs}ms)`);
 
   } catch (err: any) {
-    console.error(`  [WA Bot] Group mention ERROR:`, err?.message || err);
-    try {
-      await msg.reply("Sorry, something went wrong. Try asking me in a DM.");
-    } catch { }
+    // Silent failure in groups — a "Sorry" message addressed to the wrong person is worse
+    // than no response. The error is logged for debugging.
+    console.error(`  [WA Bot] Group mention ERROR (silent):`, err?.message || err);
   }
 
   // Clear typing
@@ -1230,6 +1246,9 @@ export function initWhatsApp() {
     const info = client!.info;
     connectedNumber = info?.wid?.user || "unknown";
     botWid = info?.wid?._serialized || null;
+
+    // Flush any stale botLids from a previous session — pollution causes false-positive @mentions.
+    botLids.clear();
 
     // Resolve bot's own LID — needed for @mention matching in groups
     // Method 1: Check contact data
